@@ -1,0 +1,75 @@
+# =============================================================================
+# AuditML — Default Configuration
+# =============================================================================
+# Copy this file, adjust the values, and pass it to:
+#   auditml --config path/to/your_config.yaml
+
+experiment_name: "audit_cifar10"
+
+# Which attacks to run (any combination of):
+#   mia_shadow, mia_threshold, model_inversion, attribute_inference
+attacks:
+  - mia_threshold
+  - mia_shadow
+
+# ---- Dataset ----------------------------------------------------------------
+data:
+  dataset: cifar10            # mnist | cifar10 | cifar100
+  data_dir: "./data"
+  train_ratio: 0.5            # fraction of training set used as "member" data
+  num_workers: 2
+  download: true
+
+# ---- Target model -----------------------------------------------------------
+model:
+  arch: cnn                   # architecture identifier
+  num_classes: 10
+  pretrained: false
+
+# ---- Training ---------------------------------------------------------------
+training:
+  epochs: 20
+  batch_size: 64
+  learning_rate: 0.001
+  optimizer: adam              # adam | sgd
+  weight_decay: 0.0001
+  seed: 42
+  device: auto                # auto | cpu | cuda
+
+# ---- Differential Privacy (Opacus) -----------------------------------------
+dp:
+  enabled: false
+  epsilon: 1.0
+  delta: 0.00001
+  max_grad_norm: 1.0
+
+# ---- Attack-specific parameters ---------------------------------------------
+attack_params:
+  mia_shadow:
+    num_shadow_models: 3
+    shadow_epochs: 20
+    attack_model: mlp
+
+  mia_threshold:
+    metric: loss              # loss | confidence
+    percentile: 50.0
+
+  model_inversion:
+    num_iterations: 1000
+    learning_rate: 0.01
+    lambda_tv: 0.001          # total-variation regulariser weight
+    lambda_l2: 0.0
+    target_class: null         # null = run for all classes
+
+  attribute_inference:
+    sensitive_attribute: superclass
+    attack_model: mlp
+    known_features:
+      - subclass
+
+# ---- Reporting --------------------------------------------------------------
+reporting:
+  output_dir: "./results"
+  save_plots: true
+  save_json: true
+  plot_format: png            # png | pdf | svg
