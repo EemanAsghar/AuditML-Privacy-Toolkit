@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing / Coverage
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# mypy
+.mypy_cache/
+
+# ruff
+.ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ML artifacts
+*.pt
+*.pth
+*.ckpt
+*.onnx
+models/*.pt
+models/*.pth
+results/*.json
+results/*.csv
+results/*.png
+
+# Data (top-level only; src/auditml/data/ is package code)
+/data/
+*.tar.gz
+*.zip
+
+# Environment / secrets
+.env
+*.log
