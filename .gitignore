@@ -1,61 +1,83 @@
+############################
 # Python
+############################
 __pycache__/
 *.py[cod]
 *$py.class
-*.egg-info/
+*.so
 *.egg
+*.egg-info/
 dist/
 build/
-*.so
 
+############################
 # Virtual environments
+############################
 .venv/
 venv/
 env/
 
-# IDE
+############################
+# IDE / Editors
+############################
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
+############################
 # Jupyter
+############################
 .ipynb_checkpoints/
 
+############################
 # Testing / Coverage
+############################
 .pytest_cache/
 htmlcov/
 .coverage
 .coverage.*
 coverage.xml
 
-# mypy
+############################
+# Type checking / Linting
+############################
 .mypy_cache/
-
-# ruff
 .ruff_cache/
 
+############################
 # OS
+############################
 .DS_Store
 Thumbs.db
 
-# ML artifacts
+############################
+# ML training outputs (IMPORTANT)
+############################
+models/
+results/
+logs/
+checkpoints/
+
+# Model file types (extra safety)
 *.pt
 *.pth
 *.ckpt
 *.onnx
-models/*.pt
-models/*.pth
-results/*.json
-results/*.csv
-results/*.png
 
-# Data (top-level only; src/auditml/data/ is package code)
-/data/
+############################
+# Data (never commit datasets)
+############################
+data/
+datasets/
+*.npy
+*.npz
 *.tar.gz
 *.zip
 
+############################
 # Environment / secrets
+############################
 .env
 *.log
