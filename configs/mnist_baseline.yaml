@@ -1,0 +1,22 @@
+# Baseline training for MNIST
+experiment_name: "baseline_mnist"
+attacks: []
+
+data:
+  dataset: mnist
+  train_ratio: 0.5
+
+model:
+  arch: cnn
+  num_classes: 10
+
+training:
+  epochs: 10
+  batch_size: 64
+  learning_rate: 0.001
+  optimizer: adam
+  seed: 42
+  device: auto
+
+dp:
+  enabled: false
