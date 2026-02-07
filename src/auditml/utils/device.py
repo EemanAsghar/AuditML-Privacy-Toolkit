@@ -44,7 +44,7 @@ def device_info() -> dict[str, str | bool]:
     if torch.cuda.is_available():
         info["cuda_version"] = torch.version.cuda or "unknown"
         info["gpu_name"] = torch.cuda.get_device_name(0)
-        mem = torch.cuda.get_device_properties(0).total_mem
+        mem = torch.cuda.get_device_properties(0).total_memory
         info["gpu_memory_gb"] = f"{mem / (1024 ** 3):.1f}"
     info["mps_available"] = (
         hasattr(torch.backends, "mps") and torch.backends.mps.is_available()
