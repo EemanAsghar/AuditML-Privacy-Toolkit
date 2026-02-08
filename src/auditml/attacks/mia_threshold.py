@@ -18,6 +18,8 @@ to Overfitting", IEEE CSF 2018.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -60,6 +62,9 @@ class ThresholdMIA(BaseAttack):
         self.member_scores: np.ndarray | None = None
         self.nonmember_scores: np.ndarray | None = None
         self.threshold: float | None = None
+        # Class labels for per-class evaluation (stored during run())
+        self.member_labels: np.ndarray | None = None
+        self.nonmember_labels: np.ndarray | None = None
 
     # ------------------------------------------------------------------
     # Main attack logic
@@ -93,6 +98,10 @@ class ThresholdMIA(BaseAttack):
         # Step 1: Compute signal metric for both groups
         self.member_scores = self._compute_signal(member_loader)
         self.nonmember_scores = self._compute_signal(nonmember_loader)
+
+        # Store class labels for per-class evaluation
+        self.member_labels = self._extract_labels(member_loader)
+        self.nonmember_labels = self._extract_labels(nonmember_loader)
 
         # Combine into single arrays
         all_scores = np.concatenate([self.member_scores, self.nonmember_scores])
@@ -263,3 +272,202 @@ class ThresholdMIA(BaseAttack):
         else:
             # Loss and entropy: lower = more member-like, so negate
             return -scores
+
+    # ------------------------------------------------------------------
+    # Label extraction
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _extract_labels(loader: DataLoader) -> np.ndarray:
+        """Extract the class labels from a DataLoader.
+
+        Returns
+        -------
+        np.ndarray
+            Shape ``(N,)`` — one integer class label per sample.
+        """
+        all_labels: list[np.ndarray] = []
+        for _, targets in loader:
+            all_labels.append(targets.numpy())
+        return np.concatenate(all_labels)
+
+    # ------------------------------------------------------------------
+    # Per-class evaluation
+    # ------------------------------------------------------------------
+
+    def evaluate_per_class(self) -> dict[int, dict[str, float]]:
+        """Compute evaluation metrics **separately for each class**.
+
+        This reveals whether the attack works better on certain classes.
+        For example, rare classes might be easier to identify as members
+        because the model memorises them more.
+
+        Returns
+        -------
+        dict[int, dict[str, float]]
+            Mapping from class label → metric dictionary. Each inner dict
+            has the same keys as ``evaluate()`` (accuracy, precision, …).
+
+        Raises
+        ------
+        RuntimeError
+            If ``run()`` has not been called yet.
+        """
+        if self.result is None:
+            raise RuntimeError("Call run() before evaluate_per_class().")
+
+        all_labels = np.concatenate([self.member_labels, self.nonmember_labels])
+        unique_classes = np.unique(all_labels)
+
+        per_class: dict[int, dict[str, float]] = {}
+        for cls in unique_classes:
+            mask = all_labels == cls
+            # Need at least 2 samples AND both member/non-member in this class
+            preds_cls = self.result.predictions[mask]
+            gt_cls = self.result.ground_truth[mask]
+            scores_cls = self.result.confidence_scores[mask]
+
+            if len(gt_cls) < 2 or len(np.unique(gt_cls)) < 2:
+                # Not enough data for meaningful per-class metrics
+                per_class[int(cls)] = {
+                    "accuracy": float(np.mean(preds_cls == gt_cls)) if len(gt_cls) > 0 else 0.0,
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1": 0.0,
+                    "auc_roc": 0.0,
+                    "auc_pr": 0.0,
+                    "tpr_at_1fpr": 0.0,
+                    "tpr_at_01fpr": 0.0,
+                    "n_samples": int(mask.sum()),
+                }
+                continue
+
+            metrics = self._compute_metrics(preds_cls, gt_cls, scores_cls)
+            metrics["n_samples"] = int(mask.sum())
+            per_class[int(cls)] = metrics
+
+        return per_class
+
+    # ------------------------------------------------------------------
+    # Report generation
+    # ------------------------------------------------------------------
+
+    def generate_report(self, output_dir: str | Path) -> Path:
+        """Generate a complete evaluation report with metrics and plots.
+
+        Creates the following files in *output_dir*:
+
+        - ``metrics.json`` — overall evaluation metrics
+        - ``per_class_metrics.json`` — per-class breakdown
+        - ``roc_curve.png`` — ROC curve plot
+        - ``score_distributions.png`` — histogram of member vs non-member scores
+        - ``per_class_accuracy.png`` — bar chart of per-class attack accuracy
+        - ``summary.txt`` — human-readable text summary
+
+        Parameters
+        ----------
+        output_dir:
+            Directory where all report files are saved. Created if it
+            doesn't exist.
+
+        Returns
+        -------
+        Path
+            The output directory.
+
+        Raises
+        ------
+        RuntimeError
+            If ``run()`` has not been called yet.
+        """
+        if self.result is None:
+            raise RuntimeError("Call run() before generate_report().")
+
+        # Lazy import to avoid matplotlib overhead when not needed
+        from auditml.attacks.visualization import (
+            plot_per_class_metrics,
+            plot_roc_curve,
+            plot_score_distributions,
+        )
+
+        out = Path(output_dir)
+        out.mkdir(parents=True, exist_ok=True)
+
+        # 1. Overall metrics
+        metrics = self.evaluate()
+        with open(out / "metrics.json", "w") as f:
+            json.dump(metrics, f, indent=2)
+
+        # 2. Per-class metrics
+        per_class = self.evaluate_per_class()
+        # JSON keys must be strings
+        per_class_str = {str(k): v for k, v in per_class.items()}
+        with open(out / "per_class_metrics.json", "w") as f:
+            json.dump(per_class_str, f, indent=2)
+
+        # 3. ROC curve
+        plot_roc_curve(
+            ground_truth=self.result.ground_truth,
+            confidence_scores=self.result.confidence_scores,
+            save_path=out / "roc_curve.png",
+        )
+
+        # 4. Score distributions histogram
+        plot_score_distributions(
+            member_scores=self.member_scores,
+            nonmember_scores=self.nonmember_scores,
+            metric_name=self.metric,
+            threshold=self.threshold,
+            save_path=out / "score_distributions.png",
+        )
+
+        # 5. Per-class accuracy bar chart
+        plot_per_class_metrics(
+            per_class_metrics=per_class,
+            save_path=out / "per_class_accuracy.png",
+        )
+
+        # 6. Human-readable summary
+        self._write_summary(out / "summary.txt", metrics, per_class)
+
+        return out
+
+    def _write_summary(
+        self,
+        path: Path,
+        metrics: dict[str, float],
+        per_class: dict[int, dict[str, float]],
+    ) -> None:
+        """Write a human-readable text summary of the attack results."""
+        lines = [
+            "=" * 60,
+            "AuditML — Threshold MIA Report",
+            "=" * 60,
+            "",
+            f"Metric used:     {self.metric}",
+            f"Threshold:       {self.threshold:.6f}",
+            f"Total samples:   {len(self.result.predictions)}",
+            f"  Members:       {int(self.result.ground_truth.sum())}",
+            f"  Non-members:   {int((1 - self.result.ground_truth).sum())}",
+            "",
+            "--- Overall Metrics ---",
+        ]
+        for key, val in metrics.items():
+            lines.append(f"  {key:<20s}: {val:.4f}")
+
+        lines.append("")
+        lines.append("--- Per-Class Breakdown ---")
+        for cls in sorted(per_class.keys()):
+            m = per_class[cls]
+            lines.append(
+                f"  Class {cls:>3d}:  acc={m['accuracy']:.3f}  "
+                f"auc={m['auc_roc']:.3f}  n={m['n_samples']}"
+            )
+
+        lines.append("")
+        lines.append("--- Metadata ---")
+        for key, val in self.result.metadata.items():
+            lines.append(f"  {key}: {val}")
+
+        lines.append("")
+        path.write_text("\n".join(lines))
