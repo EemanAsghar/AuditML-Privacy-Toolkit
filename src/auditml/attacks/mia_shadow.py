@@ -20,7 +20,9 @@ Models", IEEE S&P 2017.
 
 from __future__ import annotations
 
+import json
 import logging
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -136,6 +138,11 @@ class ShadowMIA(BaseAttack):
         # Will be populated during run()
         self.attack_model: AttackMLP | None = None
         self.trained_shadows: list[nn.Module] = []
+        # Stored during run() for evaluation and visualization
+        self.member_confidence: np.ndarray | None = None
+        self.nonmember_confidence: np.ndarray | None = None
+        self.member_labels: np.ndarray | None = None
+        self.nonmember_labels: np.ndarray | None = None
 
     # ------------------------------------------------------------------
     # Main attack logic
@@ -170,8 +177,12 @@ class ShadowMIA(BaseAttack):
         self.attack_model = self._train_attack_model(attack_features, attack_labels)
 
         # Step 4: Attack the target model
-        member_probs, _, _ = self.get_model_outputs(member_loader)
-        nonmember_probs, _, _ = self.get_model_outputs(nonmember_loader)
+        member_probs, _, member_true_labels = self.get_model_outputs(member_loader)
+        nonmember_probs, _, nonmember_true_labels = self.get_model_outputs(nonmember_loader)
+
+        # Store class labels for per-class evaluation
+        self.member_labels = member_true_labels
+        self.nonmember_labels = nonmember_true_labels
 
         # Build ground truth: 1 = member, 0 = non-member
         ground_truth = np.concatenate([
@@ -183,6 +194,10 @@ class ShadowMIA(BaseAttack):
         all_probs = np.concatenate([member_probs, nonmember_probs])
         confidence_scores = self._attack_predict(all_probs)
         predictions = (confidence_scores >= 0.5).astype(np.int32)
+
+        # Store per-group confidence for visualization
+        self.member_confidence = confidence_scores[:len(member_probs)]
+        self.nonmember_confidence = confidence_scores[len(member_probs):]
 
         self.result = AttackResult(
             predictions=predictions,
@@ -413,3 +428,174 @@ class ShadowMIA(BaseAttack):
         with torch.no_grad():
             scores = self.attack_model.predict_proba(x)
         return scores.cpu().numpy()
+
+    # ------------------------------------------------------------------
+    # Per-class evaluation
+    # ------------------------------------------------------------------
+
+    def evaluate_per_class(self) -> dict[int, dict[str, float]]:
+        """Compute evaluation metrics **separately for each class**.
+
+        Groups all samples by their original class label and computes the
+        full metric suite for each class. This reveals which classes are
+        most vulnerable to the shadow model attack.
+
+        Returns
+        -------
+        dict[int, dict[str, float]]
+            Mapping from class label to metric dictionary.
+
+        Raises
+        ------
+        RuntimeError
+            If ``run()`` has not been called yet.
+        """
+        if self.result is None:
+            raise RuntimeError("Call run() before evaluate_per_class().")
+
+        all_labels = np.concatenate([self.member_labels, self.nonmember_labels])
+        unique_classes = np.unique(all_labels)
+
+        per_class: dict[int, dict[str, float]] = {}
+        for cls in unique_classes:
+            mask = all_labels == cls
+            preds_cls = self.result.predictions[mask]
+            gt_cls = self.result.ground_truth[mask]
+            scores_cls = self.result.confidence_scores[mask]
+
+            if len(gt_cls) < 2 or len(np.unique(gt_cls)) < 2:
+                per_class[int(cls)] = {
+                    "accuracy": float(np.mean(preds_cls == gt_cls)) if len(gt_cls) > 0 else 0.0,
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1": 0.0,
+                    "auc_roc": 0.0,
+                    "auc_pr": 0.0,
+                    "tpr_at_1fpr": 0.0,
+                    "tpr_at_01fpr": 0.0,
+                    "n_samples": int(mask.sum()),
+                }
+                continue
+
+            metrics = self._compute_metrics(preds_cls, gt_cls, scores_cls)
+            metrics["n_samples"] = int(mask.sum())
+            per_class[int(cls)] = metrics
+
+        return per_class
+
+    # ------------------------------------------------------------------
+    # Report generation
+    # ------------------------------------------------------------------
+
+    def generate_report(self, output_dir: str | Path) -> Path:
+        """Generate a complete evaluation report with metrics and plots.
+
+        Creates the following files in *output_dir*:
+
+        - ``metrics.json`` — overall evaluation metrics
+        - ``per_class_metrics.json`` — per-class breakdown
+        - ``roc_curve.png`` — ROC curve plot
+        - ``confidence_distributions.png`` — histogram of attack confidence
+        - ``per_class_accuracy.png`` — bar chart of per-class accuracy
+        - ``summary.txt`` — human-readable text summary
+
+        Parameters
+        ----------
+        output_dir:
+            Directory where all report files are saved.
+
+        Returns
+        -------
+        Path
+            The output directory.
+        """
+        if self.result is None:
+            raise RuntimeError("Call run() before generate_report().")
+
+        from auditml.attacks.visualization import (
+            plot_per_class_metrics,
+            plot_roc_curve,
+            plot_score_distributions,
+        )
+
+        out = Path(output_dir)
+        out.mkdir(parents=True, exist_ok=True)
+
+        # 1. Overall metrics
+        metrics = self.evaluate()
+        with open(out / "metrics.json", "w") as f:
+            json.dump(metrics, f, indent=2)
+
+        # 2. Per-class metrics
+        per_class = self.evaluate_per_class()
+        per_class_str = {str(k): v for k, v in per_class.items()}
+        with open(out / "per_class_metrics.json", "w") as f:
+            json.dump(per_class_str, f, indent=2)
+
+        # 3. ROC curve
+        plot_roc_curve(
+            ground_truth=self.result.ground_truth,
+            confidence_scores=self.result.confidence_scores,
+            title="ROC Curve — Shadow Model MIA",
+            save_path=out / "roc_curve.png",
+        )
+
+        # 4. Confidence distribution histogram
+        plot_score_distributions(
+            member_scores=self.member_confidence,
+            nonmember_scores=self.nonmember_confidence,
+            metric_name="attack confidence",
+            save_path=out / "confidence_distributions.png",
+            title="Attack Confidence Distribution — Shadow Model MIA",
+        )
+
+        # 5. Per-class accuracy bar chart
+        plot_per_class_metrics(
+            per_class_metrics=per_class,
+            save_path=out / "per_class_accuracy.png",
+        )
+
+        # 6. Summary text
+        self._write_summary(out / "summary.txt", metrics, per_class)
+
+        return out
+
+    def _write_summary(
+        self,
+        path: Path,
+        metrics: dict[str, float],
+        per_class: dict[int, dict[str, float]],
+    ) -> None:
+        """Write a human-readable text summary of the attack results."""
+        lines = [
+            "=" * 60,
+            "AuditML — Shadow Model MIA Report",
+            "=" * 60,
+            "",
+            f"Shadow models:   {self.num_shadows}",
+            f"Shadow epochs:   {self.shadow_epochs}",
+            f"Total samples:   {len(self.result.predictions)}",
+            f"  Members:       {int(self.result.ground_truth.sum())}",
+            f"  Non-members:   {int((1 - self.result.ground_truth).sum())}",
+            "",
+            "--- Overall Metrics ---",
+        ]
+        for key, val in metrics.items():
+            lines.append(f"  {key:<20s}: {val:.4f}")
+
+        lines.append("")
+        lines.append("--- Per-Class Breakdown ---")
+        for cls in sorted(per_class.keys()):
+            m = per_class[cls]
+            lines.append(
+                f"  Class {cls:>3d}:  acc={m['accuracy']:.3f}  "
+                f"auc={m['auc_roc']:.3f}  n={m['n_samples']}"
+            )
+
+        lines.append("")
+        lines.append("--- Metadata ---")
+        for key, val in self.result.metadata.items():
+            lines.append(f"  {key}: {val}")
+
+        lines.append("")
+        path.write_text("\n".join(lines))
