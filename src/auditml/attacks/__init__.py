@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 _ATTACK_REGISTRY: dict[AttackType, str] = {
     AttackType.MIA_THRESHOLD: "auditml.attacks.mia_threshold.ThresholdMIA",
     AttackType.MIA_SHADOW: "auditml.attacks.mia_shadow.ShadowMIA",
-    # AttackType.MODEL_INVERSION: "auditml.attacks.model_inversion.ModelInversion",
+    AttackType.MODEL_INVERSION: "auditml.attacks.model_inversion.ModelInversion",
     # AttackType.ATTRIBUTE_INFERENCE: "auditml.attacks.attribute_inference.AttributeInference",
 }
 

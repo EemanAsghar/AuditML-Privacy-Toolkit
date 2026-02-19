@@ -238,7 +238,7 @@ class TestComputeMetrics:
 class TestGetAttack:
     def test_unimplemented_attack_raises(self, model, config) -> None:
         with pytest.raises(ValueError, match="not yet implemented"):
-            get_attack("model_inversion", model, config)
+            get_attack("attribute_inference", model, config)
 
     def test_invalid_attack_name_raises(self, model, config) -> None:
         with pytest.raises(ValueError):
