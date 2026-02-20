@@ -31,7 +31,9 @@ Connection to Overfitting", CSF 2018.
 
 from __future__ import annotations
 
+import json
 import logging
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -283,6 +285,10 @@ class AttributeInference(BaseAttack):
                 "sensitive_attribute": self.sensitive_attribute,
                 "mean_member_attr_confidence": float(member_attr_conf.mean()),
                 "mean_nonmember_attr_confidence": float(nonmember_attr_conf.mean()),
+                # Store probs for per-group evaluation (prefixed with _ to
+                # exclude from summary text)
+                "_member_probs": member_probs,
+                "_nonmember_probs": nonmember_probs,
             },
         )
         return self.result
@@ -439,3 +445,264 @@ class AttributeInference(BaseAttack):
         x = torch.tensor(probs, dtype=torch.float32).to(self.device)
         logits = self.attack_model(x)
         return logits.argmax(dim=1).cpu().numpy()
+
+    # ------------------------------------------------------------------
+    # Per-class evaluation (membership inference per original class)
+    # ------------------------------------------------------------------
+
+    def evaluate_per_class(self) -> dict[int, dict[str, float]]:
+        """Compute evaluation metrics separately for each original class.
+
+        Groups all samples by their original class label and computes the
+        full metric suite for each class.  This reveals which classes are
+        most vulnerable to the attribute inference attack.
+
+        Returns
+        -------
+        dict[int, dict[str, float]]
+            Mapping from class label to metric dictionary.
+
+        Raises
+        ------
+        RuntimeError
+            If ``run()`` has not been called yet.
+        """
+        if self.result is None:
+            raise RuntimeError("Call run() before evaluate_per_class().")
+
+        all_labels = np.concatenate([self.member_labels, self.nonmember_labels])
+        unique_classes = np.unique(all_labels)
+
+        per_class: dict[int, dict[str, float]] = {}
+        for cls in unique_classes:
+            mask = all_labels == cls
+            preds_cls = self.result.predictions[mask]
+            gt_cls = self.result.ground_truth[mask]
+            scores_cls = self.result.confidence_scores[mask]
+
+            if len(gt_cls) < 2 or len(np.unique(gt_cls)) < 2:
+                per_class[int(cls)] = {
+                    "accuracy": float(np.mean(preds_cls == gt_cls)) if len(gt_cls) > 0 else 0.0,
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1": 0.0,
+                    "auc_roc": 0.0,
+                    "auc_pr": 0.0,
+                    "tpr_at_1fpr": 0.0,
+                    "tpr_at_01fpr": 0.0,
+                    "n_samples": int(mask.sum()),
+                }
+                continue
+
+            metrics = self._compute_metrics(preds_cls, gt_cls, scores_cls)
+            metrics["n_samples"] = int(mask.sum())
+            per_class[int(cls)] = metrics
+
+        return per_class
+
+    # ------------------------------------------------------------------
+    # Per-group evaluation (attribute prediction accuracy per group)
+    # ------------------------------------------------------------------
+
+    def evaluate_per_group(self) -> dict[str, dict[int, float]]:
+        """Compute attribute prediction accuracy for each group.
+
+        Returns separate accuracy dictionaries for members and
+        non-members.  A gap between the two signals privacy leakage.
+
+        Returns
+        -------
+        dict with keys ``"member"`` and ``"nonmember"``, each mapping
+        group ID to prediction accuracy on that group.
+
+        Raises
+        ------
+        RuntimeError
+            If ``run()`` has not been called yet.
+        """
+        if self.result is None or self.attack_model is None:
+            raise RuntimeError("Call run() before evaluate_per_group().")
+
+        member_groups = self._labels_to_groups(self.member_labels)
+        nonmember_groups = self._labels_to_groups(self.nonmember_labels)
+
+        member_preds = self.predict_attributes(
+            self._get_stored_probs("member"),
+        )
+        nonmember_preds = self.predict_attributes(
+            self._get_stored_probs("nonmember"),
+        )
+
+        member_acc: dict[int, float] = {}
+        for g in range(self.num_groups):
+            mask = member_groups == g
+            if mask.sum() > 0:
+                member_acc[g] = float((member_preds[mask] == member_groups[mask]).mean())
+
+        nonmember_acc: dict[int, float] = {}
+        for g in range(self.num_groups):
+            mask = nonmember_groups == g
+            if mask.sum() > 0:
+                nonmember_acc[g] = float((nonmember_preds[mask] == nonmember_groups[mask]).mean())
+
+        return {"member": member_acc, "nonmember": nonmember_acc}
+
+    def _get_stored_probs(self, split: str) -> np.ndarray:
+        """Re-extract softmax probs from stored confidence data.
+
+        Since we store per-sample confidence (scalar), but need the full
+        probability vector for ``predict_attributes``, we store them
+        during ``run()``.
+        """
+        # We need to store the probs during run() — add them to metadata
+        key = f"_{split}_probs"
+        if key not in self.result.metadata:
+            raise RuntimeError(
+                f"Probabilities not stored. Ensure run() was called."
+            )
+        return self.result.metadata[key]
+
+    # ------------------------------------------------------------------
+    # Report generation
+    # ------------------------------------------------------------------
+
+    def generate_report(self, output_dir: str | Path) -> Path:
+        """Generate a complete evaluation report with metrics and plots.
+
+        Creates the following files in *output_dir*:
+
+        - ``metrics.json`` — overall evaluation metrics
+        - ``per_class_metrics.json`` — per-class breakdown
+        - ``per_group_accuracy.json`` — per-group attribute accuracy
+        - ``roc_curve.png`` — ROC curve plot
+        - ``confidence_distributions.png`` — member vs non-member histogram
+        - ``per_class_accuracy.png`` — bar chart of per-class accuracy
+        - ``attribute_accuracy.png`` — per-group member vs non-member accuracy
+        - ``summary.txt`` — human-readable text summary
+
+        Parameters
+        ----------
+        output_dir:
+            Directory where all report files are saved.
+
+        Returns
+        -------
+        Path
+            The output directory.
+        """
+        if self.result is None:
+            raise RuntimeError("Call run() before generate_report().")
+
+        from auditml.attacks.visualization import (
+            plot_attribute_accuracy,
+            plot_per_class_metrics,
+            plot_roc_curve,
+            plot_score_distributions,
+        )
+
+        out = Path(output_dir)
+        out.mkdir(parents=True, exist_ok=True)
+
+        # 1. Overall metrics
+        metrics = self.evaluate()
+        with open(out / "metrics.json", "w") as f:
+            json.dump(metrics, f, indent=2)
+
+        # 2. Per-class metrics
+        per_class = self.evaluate_per_class()
+        per_class_str = {str(k): v for k, v in per_class.items()}
+        with open(out / "per_class_metrics.json", "w") as f:
+            json.dump(per_class_str, f, indent=2)
+
+        # 3. Per-group attribute accuracy
+        per_group = self.evaluate_per_group()
+        with open(out / "per_group_accuracy.json", "w") as f:
+            json.dump({k: {str(g): v for g, v in d.items()} for k, d in per_group.items()}, f, indent=2)
+
+        # 4. ROC curve
+        plot_roc_curve(
+            ground_truth=self.result.ground_truth,
+            confidence_scores=self.result.confidence_scores,
+            title="ROC Curve — Attribute Inference Attack",
+            save_path=out / "roc_curve.png",
+        )
+
+        # 5. Confidence distribution histogram
+        plot_score_distributions(
+            member_scores=self.member_confidence,
+            nonmember_scores=self.nonmember_confidence,
+            metric_name="attribute confidence",
+            save_path=out / "confidence_distributions.png",
+            title="Attribute Confidence Distribution — Members vs Non-Members",
+        )
+
+        # 6. Per-class accuracy bar chart
+        plot_per_class_metrics(
+            per_class_metrics=per_class,
+            save_path=out / "per_class_accuracy.png",
+        )
+
+        # 7. Per-group attribute accuracy comparison
+        plot_attribute_accuracy(
+            member_accuracy=per_group["member"],
+            nonmember_accuracy=per_group["nonmember"],
+            save_path=out / "attribute_accuracy.png",
+        )
+
+        # 8. Summary text
+        self._write_summary(out / "summary.txt", metrics, per_class, per_group)
+
+        return out
+
+    def _write_summary(
+        self,
+        path: Path,
+        metrics: dict[str, float],
+        per_class: dict[int, dict[str, float]],
+        per_group: dict[str, dict[int, float]],
+    ) -> None:
+        """Write a human-readable text summary of the attack results."""
+        lines = [
+            "=" * 60,
+            "AuditML — Attribute Inference Attack Report",
+            "=" * 60,
+            "",
+            f"Sensitive attribute: {self.sensitive_attribute}",
+            f"Number of groups:    {self.num_groups}",
+            f"Total samples:       {len(self.result.predictions)}",
+            f"  Members:           {int(self.result.ground_truth.sum())}",
+            f"  Non-members:       {int((1 - self.result.ground_truth).sum())}",
+            "",
+            "--- Overall Metrics ---",
+        ]
+        for key, val in metrics.items():
+            lines.append(f"  {key:<20s}: {val:.4f}")
+
+        lines.append("")
+        lines.append("--- Per-Group Attribute Accuracy ---")
+        for g in sorted(set(per_group.get("member", {}).keys()) | set(per_group.get("nonmember", {}).keys())):
+            mem_acc = per_group.get("member", {}).get(g, 0.0)
+            nonmem_acc = per_group.get("nonmember", {}).get(g, 0.0)
+            gap = mem_acc - nonmem_acc
+            lines.append(
+                f"  Group {g:>3d}:  member={mem_acc:.3f}  "
+                f"non-member={nonmem_acc:.3f}  gap={gap:+.3f}"
+            )
+
+        lines.append("")
+        lines.append("--- Per-Class Membership Accuracy ---")
+        for cls in sorted(per_class.keys()):
+            m = per_class[cls]
+            lines.append(
+                f"  Class {cls:>3d}:  acc={m['accuracy']:.3f}  "
+                f"auc={m['auc_roc']:.3f}  n={m['n_samples']}"
+            )
+
+        lines.append("")
+        lines.append("--- Metadata ---")
+        for key, val in self.result.metadata.items():
+            if not key.startswith("_"):
+                lines.append(f"  {key}: {val}")
+
+        lines.append("")
+        path.write_text("\n".join(lines))

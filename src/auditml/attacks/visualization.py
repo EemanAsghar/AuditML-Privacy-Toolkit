@@ -353,3 +353,73 @@ def plot_reconstruction_confidence(
         fig.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     return fig
+
+
+# ── Attribute Inference Accuracy per Group ────────────────────────────────
+
+
+def plot_attribute_accuracy(
+    member_accuracy: dict[int, float],
+    nonmember_accuracy: dict[int, float],
+    save_path: str | Path | None = None,
+    title: str = "Attribute Prediction Accuracy — Members vs Non-Members",
+) -> plt.Figure:
+    """Side-by-side bar chart comparing attribute accuracy for members and non-members.
+
+    A large gap between member and non-member accuracy indicates that the
+    model's outputs reveal more about the sensitive attribute for training
+    data — a privacy leak.
+
+    Parameters
+    ----------
+    member_accuracy:
+        Mapping from group ID to attribute prediction accuracy on members.
+    nonmember_accuracy:
+        Mapping from group ID to attribute prediction accuracy on non-members.
+    save_path:
+        If given, saves the figure.
+    title:
+        Plot title.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+    groups = sorted(set(member_accuracy.keys()) | set(nonmember_accuracy.keys()))
+    mem_vals = [member_accuracy.get(g, 0.0) for g in groups]
+    nonmem_vals = [nonmember_accuracy.get(g, 0.0) for g in groups]
+
+    x = np.arange(len(groups))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(max(8, len(groups) * 0.8), 5))
+    bars_mem = ax.bar(x - width / 2, mem_vals, width, label="Members",
+                      color="#2563eb", alpha=0.8)
+    bars_non = ax.bar(x + width / 2, nonmem_vals, width, label="Non-members",
+                      color="#dc2626", alpha=0.8)
+
+    # Add value labels above bars
+    for bar in bars_mem:
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01,
+                f"{bar.get_height():.2f}", ha="center", va="bottom", fontsize=7)
+    for bar in bars_non:
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01,
+                f"{bar.get_height():.2f}", ha="center", va="bottom", fontsize=7)
+
+    ax.axhline(1.0 / max(len(groups), 1), color="grey", linestyle="--", lw=1,
+               alpha=0.7, label="Random baseline")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"Group {g}" for g in groups], fontsize=8)
+    ax.set_xlabel("Sensitive Attribute Group")
+    ax.set_ylabel("Prediction Accuracy")
+    ax.set_title(title)
+    ax.set_ylim([0, 1.15])
+    ax.legend()
+    ax.grid(True, axis="y", alpha=0.3)
+
+    fig.tight_layout()
+    if save_path is not None:
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return fig
