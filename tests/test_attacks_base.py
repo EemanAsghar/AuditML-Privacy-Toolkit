@@ -236,9 +236,14 @@ class TestComputeMetrics:
 # ── Factory function ─────────────────────────────────────────────────────
 
 class TestGetAttack:
-    def test_unimplemented_attack_raises(self, model, config) -> None:
-        with pytest.raises(ValueError, match="not yet implemented"):
-            get_attack("attribute_inference", model, config)
+    def test_all_attacks_registered(self, model, config) -> None:
+        """All four attack types should be registered and instantiable."""
+        from auditml.config.schema import AttackType, DatasetName
+
+        config.data.dataset = DatasetName.MNIST
+        for attack_type in AttackType:
+            attack = get_attack(attack_type, model, config)
+            assert isinstance(attack, BaseAttack)
 
     def test_invalid_attack_name_raises(self, model, config) -> None:
         with pytest.raises(ValueError):
