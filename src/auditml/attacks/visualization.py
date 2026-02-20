@@ -219,3 +219,137 @@ def plot_per_class_metrics(
         fig.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     return fig
+
+
+# ── Reconstructed Images Grid ────────────────────────────────────────────
+
+
+def plot_reconstructions(
+    reconstructions: dict[int, np.ndarray],
+    confidences: dict[int, float] | None = None,
+    save_path: str | Path | None = None,
+    title: str = "Model Inversion — Reconstructed Images",
+) -> plt.Figure:
+    """Display reconstructed images in a grid, one per class.
+
+    This is the key visual for model inversion: if the images look like
+    recognisable digits/objects, the model has leaked training data.
+
+    Parameters
+    ----------
+    reconstructions:
+        Mapping from class label to image array of shape
+        ``(1, C, H, W)`` or ``(C, H, W)``.
+    confidences:
+        Optional mapping from class label to reconstruction confidence.
+        Displayed below each image.
+    save_path:
+        If given, saves the figure.
+    title:
+        Plot title.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+    classes = sorted(reconstructions.keys())
+    n = len(classes)
+    cols = min(n, 5)
+    rows = (n + cols - 1) // cols
+
+    fig, axes = plt.subplots(rows, cols, figsize=(3 * cols, 3.5 * rows))
+    if n == 1:
+        axes = np.array([axes])
+    axes = np.atleast_2d(axes)
+
+    for idx, cls in enumerate(classes):
+        row, col = divmod(idx, cols)
+        ax = axes[row, col]
+
+        img = reconstructions[cls]
+        # Handle (1, C, H, W) or (C, H, W) shapes
+        if img.ndim == 4:
+            img = img[0]  # remove batch dim -> (C, H, W)
+
+        if img.shape[0] == 1:
+            # Grayscale: (1, H, W) -> (H, W)
+            ax.imshow(img[0], cmap="gray")
+        elif img.shape[0] == 3:
+            # RGB: (C, H, W) -> (H, W, C), normalise to [0, 1]
+            img_hwc = np.transpose(img, (1, 2, 0))
+            img_hwc = np.clip(
+                (img_hwc - img_hwc.min()) / (img_hwc.max() - img_hwc.min() + 1e-8),
+                0, 1,
+            )
+            ax.imshow(img_hwc)
+        else:
+            ax.imshow(img[0], cmap="gray")
+
+        label = f"Class {cls}"
+        if confidences and cls in confidences:
+            label += f"\nconf={confidences[cls]:.3f}"
+        ax.set_title(label, fontsize=9)
+        ax.axis("off")
+
+    # Hide unused subplots
+    for idx in range(n, rows * cols):
+        row, col = divmod(idx, cols)
+        axes[row, col].axis("off")
+
+    fig.suptitle(title, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    if save_path is not None:
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return fig
+
+
+# ── Reconstruction Confidence Bar Chart ──────────────────────────────────
+
+
+def plot_reconstruction_confidence(
+    confidences: dict[int, float],
+    save_path: str | Path | None = None,
+    title: str = "Reconstruction Confidence per Class",
+) -> plt.Figure:
+    """Bar chart of model confidence on each reconstructed image.
+
+    Higher confidence means the optimisation was more successful at
+    producing an image the model strongly associates with that class.
+
+    Parameters
+    ----------
+    confidences:
+        Mapping from class label to confidence (softmax probability).
+    save_path:
+        If given, saves the figure.
+    title:
+        Plot title.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+    classes = sorted(confidences.keys())
+    values = [confidences[c] for c in classes]
+
+    fig, ax = plt.subplots(figsize=(max(8, len(classes) * 0.5), 5))
+    bars = ax.bar(range(len(classes)), values, color="#7c3aed", alpha=0.8)
+
+    for bar, val in zip(bars, values):
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01,
+                f"{val:.3f}", ha="center", va="bottom", fontsize=8)
+
+    ax.set_xticks(range(len(classes)))
+    ax.set_xticklabels([str(c) for c in classes], fontsize=9)
+    ax.set_xlabel("Class")
+    ax.set_ylabel("Confidence (Softmax Probability)")
+    ax.set_title(title)
+    ax.set_ylim([0, 1.1])
+    ax.grid(True, axis="y", alpha=0.3)
+
+    fig.tight_layout()
+    if save_path is not None:
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return fig

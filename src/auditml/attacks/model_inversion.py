@@ -21,7 +21,9 @@ Information and Basic Countermeasures", CCS 2015.
 
 from __future__ import annotations
 
+import json
 import logging
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -96,6 +98,9 @@ class ModelInversion(BaseAttack):
         # Populated during run()
         self.reconstructions: dict[int, np.ndarray] = {}
         self.reconstruction_confidences: dict[int, float] = {}
+        # Stored during run() for visualization
+        self.member_scores: np.ndarray | None = None
+        self.nonmember_scores: np.ndarray | None = None
 
     # ------------------------------------------------------------------
     # Main attack logic
@@ -133,8 +138,10 @@ class ModelInversion(BaseAttack):
             self.reconstruction_confidences[cls] = confidence
 
         # Step 2: Compute membership signal using reconstruction similarity
-        member_scores = self._compute_similarity_scores(member_loader)
-        nonmember_scores = self._compute_similarity_scores(nonmember_loader)
+        self.member_scores = self._compute_similarity_scores(member_loader)
+        self.nonmember_scores = self._compute_similarity_scores(nonmember_loader)
+        member_scores = self.member_scores
+        nonmember_scores = self.nonmember_scores
 
         # Build ground truth and combined scores
         ground_truth = np.concatenate([
@@ -317,3 +324,122 @@ class ModelInversion(BaseAttack):
         diff_h = x[:, :, 1:, :] - x[:, :, :-1, :]  # vertical differences
         diff_w = x[:, :, :, 1:] - x[:, :, :, :-1]  # horizontal differences
         return torch.mean(diff_h ** 2) + torch.mean(diff_w ** 2)
+
+    # ------------------------------------------------------------------
+    # Report generation
+    # ------------------------------------------------------------------
+
+    def generate_report(self, output_dir: str | Path) -> Path:
+        """Generate a complete model inversion report.
+
+        Creates the following files in *output_dir*:
+
+        - ``metrics.json`` — overall evaluation metrics
+        - ``reconstructions.png`` — grid of reconstructed images
+        - ``reconstruction_confidence.png`` — per-class confidence bar chart
+        - ``similarity_distributions.png`` — member vs non-member similarity
+        - ``roc_curve.png`` — ROC curve
+        - ``summary.txt`` — human-readable text summary
+
+        Parameters
+        ----------
+        output_dir:
+            Directory where all report files are saved.
+
+        Returns
+        -------
+        Path
+            The output directory.
+        """
+        if self.result is None:
+            raise RuntimeError("Call run() before generate_report().")
+
+        from auditml.attacks.visualization import (
+            plot_reconstruction_confidence,
+            plot_reconstructions,
+            plot_roc_curve,
+            plot_score_distributions,
+        )
+
+        out = Path(output_dir)
+        out.mkdir(parents=True, exist_ok=True)
+
+        # 1. Overall metrics
+        metrics = self.evaluate()
+        with open(out / "metrics.json", "w") as f:
+            json.dump(metrics, f, indent=2)
+
+        # 2. Reconstructed images grid
+        plot_reconstructions(
+            reconstructions=self.reconstructions,
+            confidences=self.reconstruction_confidences,
+            save_path=out / "reconstructions.png",
+        )
+
+        # 3. Reconstruction confidence bar chart
+        plot_reconstruction_confidence(
+            confidences=self.reconstruction_confidences,
+            save_path=out / "reconstruction_confidence.png",
+        )
+
+        # 4. Similarity distribution histogram
+        plot_score_distributions(
+            member_scores=self.member_scores,
+            nonmember_scores=self.nonmember_scores,
+            metric_name="cosine similarity",
+            save_path=out / "similarity_distributions.png",
+            title="Similarity Distribution — Model Inversion",
+        )
+
+        # 5. ROC curve
+        plot_roc_curve(
+            ground_truth=self.result.ground_truth,
+            confidence_scores=self.result.confidence_scores,
+            title="ROC Curve — Model Inversion",
+            save_path=out / "roc_curve.png",
+        )
+
+        # 6. Summary text
+        self._write_summary(out / "summary.txt", metrics)
+
+        return out
+
+    def _write_summary(
+        self,
+        path: Path,
+        metrics: dict[str, float],
+    ) -> None:
+        """Write a human-readable text summary."""
+        lines = [
+            "=" * 60,
+            "AuditML — Model Inversion Report",
+            "=" * 60,
+            "",
+            f"Classes inverted: {len(self.reconstructions)}",
+            f"Iterations:       {self.num_iterations}",
+            f"Learning rate:    {self.lr}",
+            f"Lambda TV:        {self.lambda_tv}",
+            f"Lambda L2:        {self.lambda_l2}",
+            f"Input shape:      {self.input_shape}",
+            f"Total samples:    {len(self.result.predictions)}",
+            f"  Members:        {int(self.result.ground_truth.sum())}",
+            f"  Non-members:    {int((1 - self.result.ground_truth).sum())}",
+            "",
+            "--- Reconstruction Confidences ---",
+        ]
+        for cls in sorted(self.reconstruction_confidences.keys()):
+            lines.append(f"  Class {cls:>3d}: {self.reconstruction_confidences[cls]:.4f}")
+
+        lines.append("")
+        lines.append("--- Overall Metrics ---")
+        for key, val in metrics.items():
+            lines.append(f"  {key:<20s}: {val:.4f}")
+
+        lines.append("")
+        lines.append("--- Metadata ---")
+        for key, val in self.result.metadata.items():
+            if key != "reconstruction_confidences":
+                lines.append(f"  {key}: {val}")
+
+        lines.append("")
+        path.write_text("\n".join(lines))
