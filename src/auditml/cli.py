@@ -281,6 +281,19 @@ def _handle_show_config(cfg: AuditMLConfig) -> None:
     print(json.dumps(config_to_dict(cfg), indent=2))
 
 
+def _handle_ui(_cfg: AuditMLConfig) -> None:
+    """Launch the Streamlit dashboard."""
+    import subprocess
+    from pathlib import Path
+
+    home_py = Path(__file__).parent / "ui" / "Home.py"
+    if not home_py.exists():
+        print(f"Error: UI entry point not found at {home_py}", file=sys.stderr)
+        raise RuntimeError("UI files not found.")
+    print("[ui] Launching AuditML dashboard → http://localhost:8501")
+    subprocess.run([sys.executable, "-m", "streamlit", "run", str(home_py)], check=True)
+
+
 # ---------------------------------------------------------------------------
 # Argument parser
 # ---------------------------------------------------------------------------
@@ -335,6 +348,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to YAML configuration file (omit for defaults)",
     )
 
+    # -- ui ------------------------------------------------------------------
+    subparsers.add_parser(
+        "ui",
+        help="Launch the Streamlit web dashboard",
+    )
+
     return parser
 
 
@@ -346,6 +365,7 @@ _HANDLERS = {
     "audit": _handle_audit,
     "train": _handle_train,
     "show-config": _handle_show_config,
+    "ui": _handle_ui,
 }
 
 
