@@ -10,7 +10,6 @@ import pytest
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-
 # ── Dimensions ───────────────────────────────────────────────────────────
 
 BATCH_SIZE = 16

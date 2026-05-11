@@ -9,12 +9,12 @@ from __future__ import annotations
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import auc, roc_curve
-
 
 # ── Metric Comparison Bar Chart ──────────────────────────────────────────
 

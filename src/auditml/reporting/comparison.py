@@ -23,8 +23,6 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-
 from auditml.attacks.base import BaseAttack
 from auditml.attacks.results import AttackResult
 

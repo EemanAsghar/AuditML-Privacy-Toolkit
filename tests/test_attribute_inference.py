@@ -9,14 +9,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from auditml.attacks.attribute_inference import AttributeAttackMLP, AttributeInference
 from auditml.attacks.results import AttackResult
 from auditml.config import default_config
 from auditml.config.schema import DatasetName
-
 
 # ── Fixtures ─────────────────────────────────────────────────────────────
 

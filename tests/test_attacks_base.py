@@ -11,12 +11,11 @@ import pytest
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
+from auditml.attacks import get_attack
 from auditml.attacks.base import BaseAttack
 from auditml.attacks.results import AttackResult
-from auditml.attacks import get_attack
 from auditml.config import AuditMLConfig, default_config
 from auditml.models import SimpleCNN
-
 
 # ── Concrete dummy attack for testing ────────────────────────────────────
 

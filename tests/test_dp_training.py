@@ -7,9 +7,7 @@ the end-to-end DP training flow using Opacus.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
-import numpy as np
 import pytest
 import torch
 import torch.nn as nn
@@ -22,7 +20,6 @@ from auditml.training.dp_trainer import (
     is_dp_compatible,
     validate_and_fix_model,
 )
-
 
 # ── Fixtures ─────────────────────────────────────────────────────────────
 

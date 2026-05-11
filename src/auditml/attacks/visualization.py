@@ -11,15 +11,14 @@ on headless servers (e.g. Colab, CI) without requiring a display.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import matplotlib
+
 matplotlib.use("Agg")  # headless-safe — must come before pyplot import
 
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import auc, roc_curve
-
 
 # ── ROC Curve ────────────────────────────────────────────────────────────
 

@@ -24,7 +24,6 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import torch
@@ -34,8 +33,8 @@ from torch.utils.data import DataLoader
 
 from auditml.attacks.base import BaseAttack
 from auditml.attacks.results import AttackResult
-from auditml.config.schema import AuditMLConfig
 from auditml.data.datasets import DATASET_INFO
+from auditml.utils.rust_accel import batch_ssim as _batch_ssim
 
 logger = logging.getLogger(__name__)
 
@@ -67,25 +66,34 @@ class ModelInversion(BaseAttack):
     def __init__(
         self,
         target_model: nn.Module,
-        config: AuditMLConfig,
+        config=None,
         device: torch.device | str = "cpu",
         input_shape: tuple[int, ...] | None = None,
+        *,
+        num_iterations: int | None = None,
+        learning_rate: float | None = None,
+        lambda_tv: float | None = None,
+        lambda_l2: float | None = None,
+        target_class: int | None = None,
+        num_classes: int | None = None,
     ) -> None:
         super().__init__(target_model, config, device)
 
-        # Config shortcuts
-        params = config.attack_params.model_inversion
-        self.num_iterations = params.num_iterations
-        self.lr = params.learning_rate
-        self.lambda_tv = params.lambda_tv
-        self.lambda_l2 = params.lambda_l2
-        self.target_class = params.target_class
-        self.num_classes = config.model.num_classes
+        # Explicit params take priority; fall back to config; then hardcoded defaults.
+        cfg_p = config.attack_params.model_inversion if config is not None else None
+        self.num_iterations = num_iterations or (cfg_p.num_iterations if cfg_p else 500)
+        self.lr = learning_rate or (cfg_p.learning_rate if cfg_p else 0.1)
+        self.lambda_tv = (
+            lambda_tv if lambda_tv is not None else (cfg_p.lambda_tv if cfg_p else 0.001)
+        )
+        self.lambda_l2 = lambda_l2 if lambda_l2 is not None else (cfg_p.lambda_l2 if cfg_p else 0.0)
+        self.target_class = target_class or (cfg_p.target_class if cfg_p else None)
+        self.num_classes = num_classes or (config.model.num_classes if config is not None else 10)
 
-        # Determine input shape
+        # Determine input shape — explicit > config dataset > error
         if input_shape is not None:
             self.input_shape = input_shape
-        else:
+        elif config is not None:
             dataset_name = config.data.dataset.value
             if dataset_name in DATASET_INFO:
                 self.input_shape = DATASET_INFO[dataset_name].input_shape
@@ -94,6 +102,9 @@ class ModelInversion(BaseAttack):
                     f"Cannot infer input_shape for dataset {dataset_name!r}. "
                     "Pass input_shape explicitly."
                 )
+        else:
+            # Will be auto-detected from the first batch in run()
+            self.input_shape = None
 
         # Populated during run()
         self.reconstructions: dict[int, np.ndarray] = {}
@@ -124,6 +135,12 @@ class ModelInversion(BaseAttack):
         the reconstructed class prototype. Members tend to produce
         outputs closer to the reconstruction.
         """
+        # Auto-detect input shape from data if not provided at init
+        if self.input_shape is None:
+            first_batch = next(iter(member_loader))
+            self.input_shape = tuple(first_batch[0].shape[1:])
+            logger.info("Auto-detected input_shape=%s from data", self.input_shape)
+
         # Determine which classes to invert
         if self.target_class is not None:
             classes_to_invert = [self.target_class]
@@ -131,7 +148,8 @@ class ModelInversion(BaseAttack):
             classes_to_invert = list(range(self.num_classes))
 
         # Step 1: Reconstruct images for each target class
-        for cls in classes_to_invert:
+        from tqdm import tqdm as _tqdm
+        for cls in _tqdm(classes_to_invert, desc="Inverting classes", unit="class", ncols=70):
             logger.info("Inverting class %d/%d ...", cls + 1, len(classes_to_invert))
             recon, confidence = self.invert_class(cls)
             self.reconstructions[cls] = recon.detach().cpu().numpy()
@@ -209,7 +227,10 @@ class ModelInversion(BaseAttack):
         best_confidence = 0.0
         best_x = x.detach().clone()
 
-        for i in range(num_iterations):
+        from tqdm import tqdm
+        pbar = tqdm(range(num_iterations), desc=f"  class {target_class}", leave=False,
+                    unit="step", ncols=70)
+        for i in pbar:
             optimizer.zero_grad()
 
             # Forward pass
@@ -236,6 +257,7 @@ class ModelInversion(BaseAttack):
             if current_confidence > best_confidence:
                 best_confidence = current_confidence
                 best_x = x.detach().clone()
+            pbar.set_postfix(conf=f"{current_confidence:.3f}")
 
         logger.info(
             "Class %d: confidence=%.4f after %d iterations",
@@ -364,8 +386,22 @@ class ModelInversion(BaseAttack):
         out = Path(output_dir)
         out.mkdir(parents=True, exist_ok=True)
 
-        # 1. Overall metrics
+        # 1. Overall metrics + SSIM reconstruction quality
         metrics = self.evaluate()
+
+        # Pairwise SSIM between class reconstructions — higher diversity = better inversion
+        recon_list = list(self.reconstructions.values())
+        if len(recon_list) >= 2:
+            flat = [r.flatten() for r in recon_list]
+            # Compare each reconstruction against the mean reconstruction
+            mean_recon = np.mean(np.stack(flat), axis=0)
+            ssim_vs_mean = _batch_ssim(flat, [mean_recon] * len(flat))
+            metrics["mean_ssim_vs_mean_recon"] = float(np.mean(ssim_vs_mean))
+            metrics["reconstruction_ssim_scores"] = {
+                int(cls): float(s)
+                for cls, s in zip(self.reconstructions.keys(), ssim_vs_mean)
+            }
+
         with open(out / "metrics.json", "w") as f:
             json.dump(metrics, f, indent=2)
 
@@ -433,7 +469,10 @@ class ModelInversion(BaseAttack):
         lines.append("")
         lines.append("--- Overall Metrics ---")
         for key, val in metrics.items():
-            lines.append(f"  {key:<20s}: {val:.4f}")
+            if isinstance(val, dict):
+                lines.append(f"  {key:<20s}: {val}")
+            else:
+                lines.append(f"  {key:<20s}: {val:.4f}")
 
         lines.append("")
         lines.append("--- Metadata ---")

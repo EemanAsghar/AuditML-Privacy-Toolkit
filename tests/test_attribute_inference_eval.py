@@ -7,22 +7,20 @@ generation, and the new ``plot_attribute_accuracy`` visualization.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import numpy as np
 import pytest
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from auditml.attacks.attribute_inference import AttributeAttackMLP, AttributeInference
+from auditml.attacks.attribute_inference import AttributeInference
 from auditml.attacks.visualization import plot_attribute_accuracy
 from auditml.config import default_config
 from auditml.config.schema import DatasetName
 from auditml.models import SimpleCNN
-
 
 # ── Fixtures ─────────────────────────────────────────────────────────────
 

@@ -23,17 +23,14 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 
 from auditml.attacks.base import BaseAttack
 from auditml.attacks.results import AttackResult
-from auditml.config.schema import AuditMLConfig
 from auditml.data.datasets import get_shadow_data_splits
 from auditml.models import get_model
 from auditml.training.trainer import Trainer, build_optimizer
@@ -120,20 +117,42 @@ class ShadowMIA(BaseAttack):
     def __init__(
         self,
         target_model: nn.Module,
-        config: AuditMLConfig,
+        config=None,
         device: torch.device | str = "cpu",
         shadow_dataset: Dataset | None = None,
         shadow_models: list[tuple[nn.Module, DataLoader, DataLoader]] | None = None,
+        shadow_model_fn=None,
+        *,
+        num_shadows: int | None = None,
+        shadow_epochs: int | None = None,
+        num_classes: int | None = None,
+        batch_size: int | None = None,
+        member_ratio: float | None = None,
+        seed: int | None = None,
+        optimizer: str | None = None,
+        learning_rate: float | None = None,
+        weight_decay: float | None = None,
     ) -> None:
         super().__init__(target_model, config, device)
         self.shadow_dataset = shadow_dataset
         self.shadow_models = shadow_models
+        self.shadow_model_fn = shadow_model_fn
 
-        # Config shortcuts
-        params = config.attack_params.mia_shadow
-        self.num_shadows = params.num_shadow_models
-        self.shadow_epochs = params.shadow_epochs
-        self.num_classes = config.model.num_classes
+        # Explicit params take priority; fall back to config; then hardcoded defaults.
+        cfg_p = config.attack_params.mia_shadow if config is not None else None
+        self.num_shadows = num_shadows or (cfg_p.num_shadow_models if cfg_p else 4)
+        self.shadow_epochs = shadow_epochs or (cfg_p.shadow_epochs if cfg_p else 10)
+        self.num_classes = num_classes or (config.model.num_classes if config is not None else 10)
+        self._batch_size = batch_size or (config.training.batch_size if config is not None else 64)
+        self._member_ratio = (
+            member_ratio or (config.data.train_ratio if config is not None else 0.5)
+        )
+        self._seed = seed or (config.training.seed if config is not None else 42)
+        self._optimizer = optimizer or (config.training.optimizer if config is not None else "adam")
+        self._lr = learning_rate or (config.training.learning_rate if config is not None else 0.001)
+        self._weight_decay = (
+            weight_decay or (config.training.weight_decay if config is not None else 1e-4)
+        )
 
         # Will be populated during run()
         self.attack_model: AttackMLP | None = None
@@ -247,24 +266,32 @@ class ShadowMIA(BaseAttack):
         ``shadow_dataset``. This mirrors how the target model was trained,
         so the shadow models learn similar decision boundaries.
         """
-        batch_size = self.config.training.batch_size
+        batch_size = self._batch_size
         splits = get_shadow_data_splits(
             self.shadow_dataset,
             n_shadows=self.num_shadows,
-            member_ratio=self.config.data.train_ratio,
-            seed=self.config.training.seed,
+            member_ratio=self._member_ratio,
+            seed=self._seed,
         )
 
         results: list[tuple[nn.Module, DataLoader, DataLoader]] = []
 
-        for i, (member_set, nonmember_set, _, _) in enumerate(splits):
+        from tqdm import tqdm
+        for i, (member_set, nonmember_set, _, _) in enumerate(
+            tqdm(splits, desc="Training shadow models", unit="model", ncols=70)
+        ):
             logger.info("Training shadow model %d/%d ...", i + 1, self.num_shadows)
 
-            # Create a fresh model with the same architecture as the target
-            shadow = get_model(
-                arch=self.config.model.arch,
-                dataset=self.config.data.dataset.value,
-            ).to(self.device)
+            # Create a fresh model — user factory > config registry > MLP fallback
+            if self.shadow_model_fn is not None:
+                shadow = self.shadow_model_fn().to(self.device)
+            elif self.config is not None:
+                shadow = get_model(
+                    arch=self.config.model.arch,
+                    dataset=self.config.data.dataset.value,
+                ).to(self.device)
+            else:
+                shadow = self._build_fallback_shadow(member_set).to(self.device)
 
             # Create data loaders
             train_loader = DataLoader(
@@ -277,9 +304,9 @@ class ShadowMIA(BaseAttack):
             # Train the shadow model
             optimizer = build_optimizer(
                 shadow,
-                name=self.config.training.optimizer,
-                lr=self.config.training.learning_rate,
-                weight_decay=self.config.training.weight_decay,
+                name=self._optimizer,
+                lr=self._lr,
+                weight_decay=self._weight_decay,
             )
             trainer = Trainer(
                 model=shadow,
@@ -303,6 +330,40 @@ class ShadowMIA(BaseAttack):
             results.append((shadow, member_eval, nonmember_eval))
 
         return results
+
+    def _build_fallback_shadow(self, dataset) -> nn.Module:
+        """Build a simple MLP shadow model when no factory or config is given.
+
+        Infers the input dimension from the first sample in *dataset* and
+        creates a 3-layer MLP that matches ``self.num_classes`` outputs.
+        """
+        sample_x = dataset[0][0]
+        input_dim = int(sample_x.numel())
+        num_out = self.num_classes
+
+        hidden = max(64, min(512, input_dim))
+
+        class _FallbackMLP(nn.Module):
+            def __init__(self) -> None:
+                super().__init__()
+                self.net = nn.Sequential(
+                    nn.Flatten(),
+                    nn.Linear(input_dim, hidden),
+                    nn.ReLU(),
+                    nn.Linear(hidden, hidden // 2),
+                    nn.ReLU(),
+                    nn.Linear(hidden // 2, num_out),
+                )
+
+            def forward(self, x: torch.Tensor) -> torch.Tensor:
+                return self.net(x)
+
+        logger.info(
+            "shadow_model_fn not provided — using fallback MLP "
+            "(%d → %d → %d → %d)",
+            input_dim, hidden, hidden // 2, num_out,
+        )
+        return _FallbackMLP()
 
     # ------------------------------------------------------------------
     # Step 2: Collect attack training data

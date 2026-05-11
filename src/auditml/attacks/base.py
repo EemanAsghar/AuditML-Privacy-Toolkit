@@ -13,8 +13,6 @@ per-sample loss values, and calculating standard evaluation metrics.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any
 
 import numpy as np
 import torch
@@ -33,7 +31,6 @@ from sklearn.metrics import (
 from torch.utils.data import DataLoader
 
 from auditml.attacks.results import AttackResult
-from auditml.config.schema import AuditMLConfig
 
 
 class BaseAttack(ABC):
@@ -44,7 +41,9 @@ class BaseAttack(ABC):
     target_model:
         The trained model being attacked. Must be in ``eval()`` mode.
     config:
-        Full AuditML configuration (the attack reads its own section).
+        Optional AuditML configuration. When provided (YAML / CLI
+        workflow) the attack reads its params from it. When ``None``
+        each subclass uses its own explicit keyword parameters instead.
     device:
         Torch device the model lives on.
     """
@@ -54,7 +53,7 @@ class BaseAttack(ABC):
     def __init__(
         self,
         target_model: nn.Module,
-        config: AuditMLConfig,
+        config=None,
         device: torch.device | str = "cpu",
     ) -> None:
         self.target_model = target_model

@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuditML — Privacy Auditing for PyTorch Models</title>
+  <meta name="description" content="One function call to audit your ML model for membership inference, model inversion, and attribute inference attacks." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #ffffff;
+      --bg-subtle: #f8fafc;
+      --bg-muted:  #f1f5f9;
+      --border:    #e2e8f0;
+      --text:      #0f172a;
+      --text-2:    #475569;
+      --text-3:    #94a3b8;
+      --accent:    #6366f1;
+      --accent-2:  #818cf8;
+      --accent-bg: #eef2ff;
+      --green:     #22c55e;
+      --red:       #ef4444;
+      --yellow:    #f59e0b;
+      --code-bg:   #0f172a;
+      --code-text: #e2e8f0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── NAV ──────────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+    .nav-logo .logo-icon {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+    }
+    .nav-links a {
+      padding: 0.4rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-2);
+      transition: color 0.15s, background 0.15s;
+    }
+    .nav-links a:hover { background: var(--bg-muted); color: var(--text); }
+    .nav-cta {
+      background: var(--text);
+      color: white !important;
+      border-radius: 8px;
+      padding: 0.4rem 1rem !important;
+      font-weight: 600 !important;
+      transition: opacity 0.15s !important;
+    }
+    .nav-cta:hover { opacity: 0.85; background: var(--text) !important; }
+
+    /* ── HERO ─────────────────────────────────────────────────────── */
+    .hero {
+      padding: 140px 1.5rem 100px;
+      text-align: center;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent-bg);
+      color: var(--accent);
+      border: 1px solid #c7d2fe;
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+    .hero-badge .dot {
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    .hero h1 {
+      font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-2);
+      max-width: 580px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3.5rem;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      padding: 0.75rem 1.75rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99,102,241,0.45);
+    }
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      padding: 0.75rem 1.75rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--text-3); background: var(--bg-subtle); }
+
+    /* code window */
+    .code-window {
+      background: var(--code-bg);
+      border-radius: 14px;
+      overflow: hidden;
+      text-align: left;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.06);
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .code-titlebar {
+      background: #1e293b;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .dot-red   { width:12px;height:12px;border-radius:50%;background:#ff5f57; }
+    .dot-yel   { width:12px;height:12px;border-radius:50%;background:#febc2e; }
+    .dot-grn   { width:12px;height:12px;border-radius:50%;background:#28c840; }
+    .code-titlebar span {
+      margin-left: auto;
+      font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: #475569;
+    }
+    .code-body {
+      padding: 1.5rem 1.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: var(--code-text);
+      overflow-x: auto;
+    }
+    .cm  { color: #64748b; }   /* comment */
+    .ck  { color: #c084fc; }   /* keyword */
+    .cf  { color: #60a5fa; }   /* function */
+    .cs  { color: #34d399; }   /* string */
+    .co  { color: #fb923c; }   /* output / accent */
+    .cn  { color: #f1f5f9; }   /* neutral text */
+
+    /* ── STATS ────────────────────────────────────────────────────── */
+    .stats {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-subtle);
+      padding: 2.5rem 1.5rem;
+    }
+    .stats-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      text-align: center;
+    }
+    .stat-item { padding: 0.5rem; }
+    .stat-item .num {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+    .stat-item .label {
+      font-size: 0.88rem;
+      color: var(--text-2);
+      font-weight: 500;
+      margin-top: 0.15rem;
+    }
+
+    /* ── SECTIONS ─────────────────────────────────────────────────── */
+    section { padding: 100px 1.5rem; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-tag {
+      display: inline-block;
+      background: var(--accent-bg);
+      color: var(--accent);
+      border-radius: 6px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--text-2);
+      max-width: 540px;
+      line-height: 1.7;
+    }
+
+    /* ── HOW IT WORKS ─────────────────────────────────────────────── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 3.5rem;
+    }
+    .step {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      position: relative;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .step:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.07); transform: translateY(-2px); }
+    .step-num {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 1.25rem;
+    }
+    .step-icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .step h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    .step p {
+      font-size: 0.93rem;
+      color: var(--text-2);
+      line-height: 1.65;
+    }
+    .step .step-code {
+      margin-top: 1rem;
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--code-text);
+      overflow-x: auto;
+    }
+
+    /* ── ATTACKS ──────────────────────────────────────────────────── */
+    .attacks-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+    }
+    .attack-card {
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      background: var(--bg);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .attack-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .attack-card:hover { border-color: #c7d2fe; box-shadow: 0 8px 30px rgba(99,102,241,0.08); transform: translateY(-2px); }
+    .attack-card:hover::before { opacity: 1; }
+    .attack-icon {
+      font-size: 1.6rem;
+      margin-bottom: 0.75rem;
+    }
+    .attack-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.6rem;
+      border-radius: 5px;
+      margin-bottom: 0.75rem;
+    }
+    .badge-fast { background: #dcfce7; color: #16a34a; }
+    .badge-powerful { background: #fef3c7; color: #d97706; }
+    .badge-visual { background: #ede9fe; color: #7c3aed; }
+    .badge-sensitive { background: #fee2e2; color: #dc2626; }
+    .attack-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .attack-card p {
+      font-size: 0.92rem;
+      color: var(--text-2);
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+    .attack-meta {
+      display: flex;
+      gap: 1.25rem;
+    }
+    .attack-meta-item {
+      font-size: 0.82rem;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .attack-meta-item .tag {
+      font-weight: 600;
+      color: var(--text-2);
+    }
+
+    /* ── INSTALL ──────────────────────────────────────────────────── */
+    .install-section { background: var(--bg-subtle); }
+    .install-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      margin-top: 3.5rem;
+    }
+    .install-left h2 { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; }
+    .install-left p { font-size: 1rem; color: var(--text-2); line-height: 1.7; margin-bottom: 1.75rem; }
+    .pip-box {
+      background: var(--code-bg);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .pip-box code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      color: #34d399;
+    }
+    .copy-btn {
+      background: #1e293b;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.78rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      transition: background 0.15s, color 0.15s;
+    }
+    .copy-btn:hover { background: #334155; color: #e2e8f0; }
+    .install-note {
+      font-size: 0.83rem;
+      color: var(--text-3);
+    }
+    .install-note a { color: var(--accent); font-weight: 600; }
+    .install-note a:hover { text-decoration: underline; }
+    .install-right .code-window { max-width: none; }
+
+    /* ── RESULT PREVIEW ───────────────────────────────────────────── */
+    .result-preview {
+      background: var(--code-bg);
+      border-radius: 14px;
+      padding: 1.5rem 1.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.9;
+      color: var(--code-text);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    }
+    .result-preview .bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    .result-preview .bar-fill {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--accent);
+    }
+    .result-preview .bar-bg {
+      height: 6px;
+      border-radius: 3px;
+      background: #1e293b;
+      flex: 1;
+      overflow: hidden;
+    }
+    .result-preview .bar-val { font-size: 0.75rem; color: #94a3b8; min-width: 2.5rem; }
+    .r-head  { color: #c084fc; font-weight: 700; }
+    .r-sep   { color: #334155; }
+    .r-name  { color: #60a5fa; }
+    .r-ok    { color: #22c55e; font-weight: 700; }
+    .r-warn  { color: #f59e0b; font-weight: 700; }
+    .r-val   { color: #e2e8f0; }
+    .r-dim   { color: #475569; }
+
+    /* ── FOOTER ───────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--bg-subtle);
+      padding: 3rem 1.5rem;
+    }
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .footer-logo {
+      font-weight: 800;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text);
+    }
+    .footer-logo .logo-icon { width:24px;height:24px;font-size:0.75rem; }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .footer-links a {
+      font-size: 0.88rem;
+      color: var(--text-2);
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy {
+      font-size: 0.82rem;
+      color: var(--text-3);
+    }
+    .footer-copy a { color: var(--accent); font-weight: 600; }
+    .footer-copy a:hover { text-decoration: underline; }
+
+    /* ── RESPONSIVE ───────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .stats-inner { grid-template-columns: repeat(2, 1fr); }
+      .steps { grid-template-columns: 1fr; }
+      .attacks-grid { grid-template-columns: 1fr; }
+      .install-grid { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+      nav .nav-links { gap: 0; }
+      nav .nav-links li:not(:last-child) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ NAV ══════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <div class="logo-icon">A</div>
+      AuditML
+    </a>
+    <ul class="nav-links">
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#attacks">Attacks</a></li>
+      <li><a href="https://eemanasghar.github.io/AuditML/" target="_blank">Docs</a></li>
+      <li><a href="https://github.com/EemanAsghar/AuditML" target="_blank" class="nav-cta">GitHub ↗</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<div class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Open Source · MIT License
+  </div>
+
+  <h1>
+    Privacy Auditing<br />
+    for <span class="grad">PyTorch Models</span>
+  </h1>
+
+  <p>
+    One function call to audit your trained model for membership inference,
+    model inversion, and attribute inference attacks.
+    Know your model's privacy risk before it's deployed.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#install" class="btn-primary">Get Started →</a>
+    <a href="https://eemanasghar.github.io/AuditML/" target="_blank" class="btn-secondary">Read the Docs</a>
+  </div>
+
+  <div class="code-window">
+    <div class="code-titlebar">
+      <div class="dot-red"></div>
+      <div class="dot-yel"></div>
+      <div class="dot-grn"></div>
+      <span>audit_my_model.py</span>
+    </div>
+    <div class="code-body">
+<span class="ck">import</span> <span class="cn">auditml</span><br />
+<br />
+<span class="cm"># Works with any trained PyTorch model</span><br />
+<span class="cn">results</span> <span class="cn">=</span> <span class="cf">auditml.audit</span><span class="cn">(</span><br />
+<span class="cn">&nbsp;&nbsp;&nbsp;&nbsp;model</span><span class="cn">,</span><br />
+<span class="cn">&nbsp;&nbsp;&nbsp;&nbsp;member_loader</span><span class="cn">,</span>
+<span class="cm">&nbsp;&nbsp;# samples model trained on</span><br />
+<span class="cn">&nbsp;&nbsp;&nbsp;&nbsp;nonmember_loader</span><span class="cn">,</span>
+<span class="cm">&nbsp;# samples it didn't see</span><br />
+<span class="cn">)</span><br />
+<br />
+<span class="cf">print</span><span class="cn">(results.summary())</span><br />
+<br />
+<span class="cm"># ── Results ──────────────────────────────────</span><br />
+<span class="cm"># Attack            Accuracy   AUC-ROC    F1</span><br />
+<span class="cm"># mia_threshold     0.612      0.641    0.608</span><br />
+<span class="cm"># model_inversion   0.553      0.571    0.549</span><br />
+<span class="co"># ⚠  Leakage detected — consider DP training</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STATS ══════════ -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="num">4</div>
+      <div class="label">Privacy Attacks</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">380+</div>
+      <div class="label">Tests Passing</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">1</div>
+      <div class="label">Function Call</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">MIT</div>
+      <div class="label">Open Source</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ HOW IT WORKS ══════════ -->
+<section id="how-it-works">
+  <div class="section-inner">
+    <div class="section-tag">How it works</div>
+    <h2 class="section-title">From model to privacy report<br />in three steps</h2>
+    <p class="section-sub">
+      No config files. No YAML. No custom dataset wrappers.
+      Bring your model and your data — AuditML handles the rest.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon">🧠</div>
+        <h3>Train your model</h3>
+        <p>
+          Use any PyTorch architecture you want. AuditML doesn't care
+          about CNN vs ResNet vs Transformer — if it's an <code>nn.Module</code>,
+          it works.
+        </p>
+        <div class="step-code">
+          <span style="color:#c084fc">model</span> = <span style="color:#60a5fa">MyCNN</span>()<br />
+          <span style="color:#c084fc">model</span>.train()<br />
+          <span style="color:#64748b"># ... your training loop</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon">🔍</div>
+        <h3>Run the audit</h3>
+        <p>
+          Pass your trained model and two data loaders — one of samples
+          it trained on, one it didn't. Choose which attacks to run or
+          run all four.
+        </p>
+        <div class="step-code">
+          <span style="color:#c084fc">results</span> = <span style="color:#60a5fa">auditml.audit</span>(<br />
+          &nbsp;&nbsp;<span style="color:#f1f5f9">model</span>, <span style="color:#f1f5f9">members</span>, <span style="color:#f1f5f9">nonmembers</span><br />
+          )
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon">📊</div>
+        <h3>Get your report</h3>
+        <p>
+          Accuracy, AUC-ROC, TPR@1%FPR, and more — per attack.
+          See which attacks worked, how bad the leakage is, and
+          what to do about it.
+        </p>
+        <div class="step-code">
+          <span style="color:#34d399">results</span>[<span style="color:#fbbf24">"mia_threshold"</span>].auc_roc<br />
+          <span style="color:#34d399">results</span>.most_vulnerable()<br />
+          <span style="color:#34d399">results</span>.is_vulnerable()
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ATTACKS ══════════ -->
+<section id="attacks" style="background: var(--bg-subtle);">
+  <div class="section-inner">
+    <div class="section-tag">Privacy Attacks</div>
+    <h2 class="section-title">Four attacks. One unified API.</h2>
+    <p class="section-sub">
+      Each attack exposes a different kind of privacy leakage.
+      Run them all at once or pick only the ones you need.
+    </p>
+
+    <div class="attacks-grid">
+
+      <div class="attack-card">
+        <div class="attack-icon">🎯</div>
+        <span class="attack-badge badge-fast">Fast · seconds</span>
+        <h3>Threshold Membership Inference</h3>
+        <p>
+          Classifies training members vs non-members by thresholding the
+          model's prediction confidence on the true label.
+          The fastest attack — a strong privacy baseline in seconds.
+        </p>
+        <div class="attack-meta">
+          <div class="attack-meta-item">
+            <span>Type:</span><span class="tag">White-box</span>
+          </div>
+          <div class="attack-meta-item">
+            <span>Signal:</span><span class="tag">Loss / confidence</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="attack-card">
+        <div class="attack-icon">👥</div>
+        <span class="attack-badge badge-powerful">Powerful · minutes</span>
+        <h3>Shadow Model MIA</h3>
+        <p>
+          Trains multiple shadow models that mimic the target, generating
+          (output, membership) pairs to train an MLP attack classifier.
+          The most powerful known membership inference attack.
+        </p>
+        <div class="attack-meta">
+          <div class="attack-meta-item">
+            <span>Type:</span><span class="tag">Black-box</span>
+          </div>
+          <div class="attack-meta-item">
+            <span>Signal:</span><span class="tag">Output distribution</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="attack-card">
+        <div class="attack-icon">🖼️</div>
+        <span class="attack-badge badge-visual">Visual · white-box</span>
+        <h3>Model Inversion</h3>
+        <p>
+          Reconstructs representative training images by optimising
+          in pixel space via gradient descent. Exposes what the model
+          has memorised about each class visually.
+        </p>
+        <div class="attack-meta">
+          <div class="attack-meta-item">
+            <span>Type:</span><span class="tag">White-box</span>
+          </div>
+          <div class="attack-meta-item">
+            <span>Signal:</span><span class="tag">Gradient + TV loss</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="attack-card">
+        <div class="attack-icon">🔍</div>
+        <span class="attack-badge badge-sensitive">Sensitive attribute</span>
+        <h3>Attribute Inference</h3>
+        <p>
+          Trains an attack model on softmax outputs to predict sensitive
+          group membership — revealing whether a model leaks protected
+          attributes about individuals in its training data.
+        </p>
+        <div class="attack-meta">
+          <div class="attack-meta-item">
+            <span>Type:</span><span class="tag">Black-box</span>
+          </div>
+          <div class="attack-meta-item">
+            <span>Signal:</span><span class="tag">Softmax outputs</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ DIFFERENTIAL PRIVACY ══════════ -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Differential Privacy</div>
+    <h2 class="section-title">Found leakage? Fix it too.</h2>
+    <p class="section-sub">
+      AuditML includes DP training via Opacus. Train with privacy guarantees,
+      then re-run the attacks to measure the exact reduction in leakage.
+    </p>
+
+    <div class="steps" style="margin-top: 3rem; grid-template-columns: repeat(3, 1fr);">
+      <div class="step">
+        <div class="step-icon">📉</div>
+        <h3>Measure leakage</h3>
+        <p>Run all four attacks on your baseline model. See exactly which attacks succeed and by how much.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">🛡️</div>
+        <h3>Train with DP</h3>
+        <p>Enable DP in the config and train a privacy-preserving model with a target ε using Opacus under the hood.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">📊</div>
+        <h3>Compare results</h3>
+        <p>The report shows attack accuracy and AUC-ROC for both models side by side with the privacy–utility tradeoff.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ INSTALL ══════════ -->
+<section id="install" class="install-section">
+  <div class="section-inner">
+    <div class="install-grid">
+
+      <div class="install-left">
+        <div class="section-tag">Get started</div>
+        <h2>Up and running<br />in 60 seconds</h2>
+        <p>
+          Install with pip, import, and call <code style="background:var(--bg-muted);padding:0.1rem 0.4rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:0.9em">auditml.audit()</code>
+          on your model. No account, no API key, no signup.
+        </p>
+
+        <div class="pip-box">
+          <code>pip install auditml</code>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install auditml');this.textContent='✓ copied';setTimeout(()=>this.textContent='copy',2000)">copy</button>
+        </div>
+
+        <p class="install-note">
+          Requires Python 3.10+ and PyTorch 2.1+.<br />
+          <a href="https://eemanasghar.github.io/AuditML/" target="_blank">Read the full installation guide →</a>
+        </p>
+      </div>
+
+      <div class="install-right">
+        <div class="code-window">
+          <div class="code-titlebar">
+            <div class="dot-red"></div>
+            <div class="dot-yel"></div>
+            <div class="dot-grn"></div>
+            <span>full_example.py</span>
+          </div>
+          <div class="code-body">
+<span class="ck">import</span> <span class="cn">auditml</span><br />
+<span class="ck">from</span> <span class="cn">torch.utils.data</span> <span class="ck">import</span> <span class="cn">DataLoader, random_split</span><br />
+<br />
+<span class="cm"># Split your dataset into members / non-members</span><br />
+<span class="cn">n</span> <span class="cn">=</span> <span class="cf">len</span><span class="cn">(train_dataset)</span><br />
+<span class="cn">members, nonmembers</span> <span class="cn">=</span> <span class="cf">random_split</span><span class="cn">(train_dataset,</span> <span class="cn">[n//2, n//2])</span><br />
+<br />
+<span class="cm"># Run all attacks</span><br />
+<span class="cn">results</span> <span class="cn">=</span> <span class="cf">auditml.audit</span><span class="cn">(</span><br />
+<span class="cn">&nbsp;&nbsp;&nbsp;&nbsp;model</span><span class="cn">,</span><br />
+<span class="cn">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="cf">DataLoader</span><span class="cn">(members),</span><br />
+<span class="cn">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="cf">DataLoader</span><span class="cn">(nonmembers),</span><br />
+<span class="cn">&nbsp;&nbsp;&nbsp;&nbsp;attacks</span><span class="cn">=</span><span class="cn">[</span><span class="cs">"mia_threshold"</span><span class="cn">,</span> <span class="cs">"model_inversion"</span><span class="cn">],</span><br />
+<span class="cn">)</span><br />
+<br />
+<span class="cm"># Access results</span><br />
+<span class="cf">print</span><span class="cn">(results.summary())</span><br />
+<span class="cn">results[</span><span class="cs">"mia_threshold"</span><span class="cn">].auc_roc</span>
+<span class="cm">&nbsp;&nbsp;# → 0.641</span><br />
+<span class="cn">results.is_vulnerable()</span>
+<span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# → True</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <div class="logo-icon" style="width:24px;height:24px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:900;">A</div>
+      AuditML
+    </div>
+
+    <ul class="footer-links">
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#attacks">Attacks</a></li>
+      <li><a href="https://eemanasghar.github.io/AuditML/" target="_blank">Documentation</a></li>
+      <li><a href="https://github.com/EemanAsghar/AuditML" target="_blank">GitHub</a></li>
+    </ul>
+
+    <p class="footer-copy">
+      MIT License · Built by <a href="https://github.com/EemanAsghar" target="_blank">Eeman Asghar</a>
+      · NUML Faisalabad FYP
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

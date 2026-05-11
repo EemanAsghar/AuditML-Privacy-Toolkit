@@ -18,7 +18,6 @@ from auditml.config import default_config
 from auditml.config.schema import DatasetName
 from auditml.models import SimpleCNN
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
 @pytest.fixture()

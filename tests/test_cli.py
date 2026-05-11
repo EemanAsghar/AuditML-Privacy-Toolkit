@@ -17,7 +17,6 @@ import pytest
 
 from auditml.cli import build_parser, main
 
-
 # ---------------------------------------------------------------------------
 # Patch targets — the actual module paths used by local imports in cli.py
 # ---------------------------------------------------------------------------

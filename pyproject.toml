@@ -10,11 +10,11 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
-    {name = "AuditML Contributors"},
+    {name = "Eeman Asghar", email = "2022bba124@student.uet.edu.pk"},
 ]
 keywords = ["privacy", "machine-learning", "pytorch", "membership-inference", "differential-privacy"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -23,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+
 dependencies = [
     "torch>=2.1.0",
     "torchvision>=0.16.0",
@@ -33,10 +34,14 @@ dependencies = [
     "matplotlib>=3.8.0",
     "seaborn>=0.12.0",
     "pyyaml>=6.0.1",
-    "click>=8.1.0",
     "tqdm>=4.66.0",
-    "streamlit>=1.32.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/EemanAsghar/AuditML"
+Documentation = "https://eemanasghar.github.io/AuditML/"
+Repository = "https://github.com/EemanAsghar/AuditML"
+"Bug Tracker" = "https://github.com/EemanAsghar/AuditML/issues"
 
 [project.optional-dependencies]
 dev = [
@@ -44,6 +49,8 @@ dev = [
     "pytest-cov>=4.1.0",
     "ruff>=0.1.0",
     "mypy>=1.7.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.24.0",
 ]
 
 [project.scripts]
@@ -52,12 +59,22 @@ auditml = "auditml.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+auditml = ["py.typed"]
+
 [tool.ruff]
 target-version = "py310"
 line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
+ignore = [
+    "N812",   # torch.nn.functional as F is standard PyTorch convention
+    "E402",   # sys.path manipulation before project imports is intentional in scripts
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/auditml/reporting/html_report.py" = ["E501"]  # HTML/CSS template strings
 
 [tool.mypy]
 python_version = "3.10"

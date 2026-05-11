@@ -9,9 +9,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
-from typing import Optional
-
 
 # ---------------------------------------------------------------------------
 # Enums
@@ -75,7 +72,7 @@ class DPConfig:
     epsilon: float = 1.0
     delta: float = 1e-5
     max_grad_norm: float = 1.0
-    noise_multiplier: Optional[float] = None
+    noise_multiplier: float | None = None
 
 
 @dataclass
@@ -103,7 +100,7 @@ class ModelInversionConfig:
     learning_rate: float = 0.01
     lambda_tv: float = 0.001
     lambda_l2: float = 0.0
-    target_class: Optional[int] = None
+    target_class: int | None = None
 
 
 @dataclass

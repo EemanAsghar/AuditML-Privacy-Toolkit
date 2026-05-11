@@ -16,7 +16,6 @@ import pytest
 from auditml.attacks.results import AttackResult
 from auditml.reporting.report_generator import ReportGenerator
 
-
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 

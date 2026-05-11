@@ -1,0 +1,80 @@
+site_name: AuditML
+site_description: Privacy Auditing Toolkit for PyTorch Models
+site_author: Eeman Asghar
+site_url: https://eemanasghar.github.io/AuditML/
+repo_url: https://github.com/EemanAsghar/AuditML
+repo_name: EemanAsghar/AuditML
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+            show_signature_annotations: true
+            members_order: source
+
+nav:
+  - Home: index.md
+  - User Guide:
+    - Installation: guide/installation.md
+    - Quick Start: guide/quickstart.md
+    - Training Models: guide/training.md
+    - Privacy Attacks: guide/attacks.md
+    - Differential Privacy: guide/differential_privacy.md
+    - Interpreting Results: guide/interpretation.md
+  - Tutorials:
+    - Membership Inference: tutorials/mia_tutorial.md
+    - DP Training: tutorials/dp_tutorial.md
+    - Running on Colab: tutorials/colab.md
+  - API Reference:
+    - Attacks: api/attacks.md
+    - Training: api/training.md
+    - Models: api/models.md
+    - Data: api/data.md
+    - Reporting: api/reporting.md
+    - Utils: api/utils.md
+  - About: about.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true

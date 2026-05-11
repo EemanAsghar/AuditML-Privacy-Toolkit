@@ -21,14 +21,12 @@ import json
 from pathlib import Path
 
 import numpy as np
-import torch
 
 from auditml.config import load_config
 from auditml.data import get_dataloaders
-from auditml.models import get_model, count_parameters
+from auditml.models import count_parameters, get_model
 from auditml.training import Trainer, build_optimizer
-from auditml.utils import set_seed, get_device, ExperimentLogger
-
+from auditml.utils import ExperimentLogger, get_device, set_seed
 
 ALL_DATASETS = ["mnist", "cifar10", "cifar100"]
 
@@ -84,7 +82,7 @@ def train_one(
         device=device,
     )
 
-    history = trainer.train(epochs=epochs, patience=10, checkpoint_dir=out_dir)
+    trainer.train(epochs=epochs, patience=10, checkpoint_dir=out_dir)
 
     # Final evaluation
     final = trainer.evaluate(loaders["test_loader"])
@@ -120,10 +118,14 @@ def train_one(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train baseline models for AuditML")
     parser.add_argument("-c", "--config", type=str, required=True, help="YAML config file")
-    parser.add_argument("--dataset", type=str, default=None, help="Override dataset (mnist/cifar10/cifar100)")
+    parser.add_argument(
+        "--dataset", type=str, default=None, help="Override dataset (mnist/cifar10/cifar100)"
+    )
     parser.add_argument("--epochs", type=int, default=None, help="Override epochs")
     parser.add_argument("--all", action="store_true", help="Train on all three datasets")
-    parser.add_argument("--output", type=str, default="models/baselines", help="Output root directory")
+    parser.add_argument(
+        "--output", type=str, default="models/baselines", help="Output root directory"
+    )
     args = parser.parse_args()
 
     cfg = load_config(args.config)

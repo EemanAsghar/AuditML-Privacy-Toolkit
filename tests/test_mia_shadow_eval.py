@@ -10,18 +10,16 @@ import json
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import numpy as np
 import pytest
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from auditml.attacks.mia_shadow import AttackMLP, ShadowMIA
+from auditml.attacks.mia_shadow import ShadowMIA
 from auditml.config import default_config
 from auditml.config.schema import DatasetName
 from auditml.models import SimpleCNN
-
 
 # ── Fixtures ─────────────────────────────────────────────────────────────
 

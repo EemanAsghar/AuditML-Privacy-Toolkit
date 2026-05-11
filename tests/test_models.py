@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import torch
 import pytest
+import torch
 
 from auditml.models import SimpleCNN, SmallResNet, count_parameters, get_model
 

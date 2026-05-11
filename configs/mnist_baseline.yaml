@@ -1,6 +1,7 @@
 # Baseline training for MNIST
 experiment_name: "baseline_mnist"
-attacks: []
+attacks:
+  - mia_threshold
 
 data:
   dataset: mnist

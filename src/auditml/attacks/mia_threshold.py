@@ -20,14 +20,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 from torch.utils.data import DataLoader
 
 from auditml.attacks.base import BaseAttack
 from auditml.attacks.results import AttackResult
-from auditml.config.schema import AuditMLConfig
+from auditml.utils.rust_accel import find_best_threshold as _rust_find_best_threshold
 
 
 class ThresholdMIA(BaseAttack):
@@ -52,11 +51,20 @@ class ThresholdMIA(BaseAttack):
 
     attack_name = "mia_threshold"
 
-    def __init__(self, target_model, config, device="cpu"):
+    def __init__(
+        self,
+        target_model,
+        config=None,
+        device="cpu",
+        *,
+        metric: str | None = None,
+        percentile: float | None = None,
+    ):
         super().__init__(target_model, config, device)
-        params = config.attack_params.mia_threshold
-        self.metric = params.metric          # "loss", "confidence", or "entropy"
-        self.percentile = params.percentile  # for fixed-percentile threshold
+        # Explicit params take priority; fall back to config; then hardcoded defaults.
+        cfg_params = config.attack_params.mia_threshold if config is not None else None
+        self.metric = metric or (cfg_params.metric if cfg_params else "loss")
+        self.percentile = percentile or (cfg_params.percentile if cfg_params else 50)
 
         # Intermediate values stored after run() for analysis/plotting
         self.member_scores: np.ndarray | None = None
@@ -215,26 +223,8 @@ class ThresholdMIA(BaseAttack):
         float
             The optimal threshold value.
         """
-        # Get sorted unique thresholds — we test each one
-        sorted_scores = np.sort(np.unique(scores))
-
-        # For efficiency, subsample if there are too many unique values
-        if len(sorted_scores) > 1000:
-            indices = np.linspace(0, len(sorted_scores) - 1, 1000, dtype=int)
-            candidates = sorted_scores[indices]
-        else:
-            candidates = sorted_scores
-
-        best_acc = 0.0
-        best_threshold = float(np.median(scores))
-
-        for t in candidates:
-            preds = self._apply_threshold(scores, t)
-            acc = float(np.mean(preds == ground_truth))
-            if acc > best_acc:
-                best_acc = acc
-                best_threshold = float(t)
-
+        # Use Rust-accelerated threshold scan (falls back to NumPy if unavailable)
+        best_threshold, _ = _rust_find_best_threshold(scores, ground_truth)
         return best_threshold
 
     def _apply_threshold(

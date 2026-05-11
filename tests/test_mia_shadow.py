@@ -18,7 +18,6 @@ from auditml.config import default_config
 from auditml.config.schema import DatasetName
 from auditml.models import SimpleCNN
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
 @pytest.fixture()
@@ -210,7 +209,9 @@ class TestFactoryIntegration:
         attack = get_attack("mia_shadow", target_model, config)
         assert isinstance(attack, ShadowMIA)
 
-    def test_factory_created_attack_needs_data(self, target_model, config, member_loader, nonmember_loader) -> None:
+    def test_factory_created_attack_needs_data(
+        self, target_model, config, member_loader, nonmember_loader
+    ) -> None:
         from auditml.attacks import get_attack
         attack = get_attack("mia_shadow", target_model, config)
         # Factory doesn't set shadow_dataset, so should raise
@@ -236,7 +237,9 @@ class TestEdgeCases:
         mem_ds = TensorDataset(torch.randn(30, 1, 28, 28), torch.randint(0, 10, (30,)))
         nonmem_ds = TensorDataset(torch.randn(30, 1, 28, 28), torch.randint(0, 10, (30,)))
 
-        shadows = [(shadow, DataLoader(mem_ds, batch_size=16), DataLoader(nonmem_ds, batch_size=16))]
+        shadows = [
+            (shadow, DataLoader(mem_ds, batch_size=16), DataLoader(nonmem_ds, batch_size=16))
+        ]
 
         config.attack_params.mia_shadow.num_shadow_models = 1
         attack = ShadowMIA(

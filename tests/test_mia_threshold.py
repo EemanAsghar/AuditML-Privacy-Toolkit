@@ -19,7 +19,6 @@ from auditml.attacks.results import AttackResult
 from auditml.config import default_config
 from auditml.models import SimpleCNN
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
 @pytest.fixture()

@@ -38,8 +38,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-
 from auditml.attacks.base import BaseAttack
 from auditml.attacks.results import AttackResult
 from auditml.reporting.attack_comparison import AttackComparison
@@ -141,6 +139,28 @@ class ReportGenerator:
 
         # 6. Write master text summary
         self._write_master_summary(out / "summary.txt", summary_data, dp_summaries)
+
+        # 7. Generate self-contained HTML report
+        try:
+            from auditml.reporting.html_report import generate_html_report
+            dp_metrics = {
+                name: attack.evaluate()
+                for name, (attack, _) in self.dp_attack_results.items()
+            } if self.dp_attack_results else None
+            html_path = generate_html_report(
+                output_dir=out,
+                experiment_name=self.experiment_name,
+                attack_results=self.attack_results,
+                dp_attack_results=self.dp_attack_results or None,
+                attack_metrics=attack_metrics,
+                dp_attack_metrics=dp_metrics,
+                model_accuracy=self.model_accuracy or None,
+                epsilon=self.epsilon,
+            )
+            summary_data["html_report"] = str(html_path)
+            logger.info("HTML report generated at %s", html_path)
+        except Exception as exc:
+            logger.warning("HTML report generation failed: %s", exc, exc_info=True)
 
         logger.info("Report generated at %s", out)
         return out

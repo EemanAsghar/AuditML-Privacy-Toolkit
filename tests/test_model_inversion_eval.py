@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,7 +26,6 @@ from auditml.attacks.visualization import (
 from auditml.config import default_config
 from auditml.config.schema import DatasetName
 from auditml.models import SimpleCNN
-
 
 # ── Fixtures ─────────────────────────────────────────────────────────────
 

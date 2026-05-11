@@ -34,6 +34,7 @@ def get_attack(
     target_model: nn.Module,
     config: AuditMLConfig,
     device: str = "cpu",
+    **kwargs,
 ) -> BaseAttack:
     """Instantiate a concrete attack by type.
 
@@ -76,7 +77,7 @@ def get_attack(
     module = importlib.import_module(module_path)
     cls = getattr(module, class_name)
 
-    return cls(target_model=target_model, config=config, device=device)
+    return cls(target_model=target_model, config=config, device=device, **kwargs)
 
 
 __all__ = [

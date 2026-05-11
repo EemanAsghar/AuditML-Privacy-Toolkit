@@ -34,7 +34,6 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import torch
@@ -44,7 +43,6 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from auditml.attacks.base import BaseAttack
 from auditml.attacks.results import AttackResult
-from auditml.config.schema import AuditMLConfig
 
 logger = logging.getLogger(__name__)
 
@@ -160,18 +158,25 @@ class AttributeInference(BaseAttack):
     def __init__(
         self,
         target_model: nn.Module,
-        config: AuditMLConfig,
+        config=None,
         device: torch.device | str = "cpu",
         num_groups: int | None = None,
         class_to_group: dict[int, int] | None = None,
+        *,
+        num_classes: int | None = None,
+        sensitive_attribute: str | None = None,
+        attack_model_type: str | None = None,
     ) -> None:
         super().__init__(target_model, config, device)
 
-        params = config.attack_params.attribute_inference
-        self.sensitive_attribute = params.sensitive_attribute
-        self.attack_model_type = params.attack_model
-        self.num_classes = config.model.num_classes
-        dataset_name = config.data.dataset.value
+        # Explicit params take priority; fall back to config; then hardcoded defaults.
+        cfg_p = config.attack_params.attribute_inference if config is not None else None
+        self.sensitive_attribute = (
+            sensitive_attribute or (cfg_p.sensitive_attribute if cfg_p else "label")
+        )
+        self.attack_model_type = attack_model_type or (cfg_p.attack_model if cfg_p else "mlp")
+        self.num_classes = num_classes or (config.model.num_classes if config is not None else 10)
+        dataset_name = config.data.dataset.value if config is not None else None
 
         # Build the class → group mapping
         if class_to_group is not None:
@@ -558,7 +563,7 @@ class AttributeInference(BaseAttack):
         key = f"_{split}_probs"
         if key not in self.result.metadata:
             raise RuntimeError(
-                f"Probabilities not stored. Ensure run() was called."
+                "Probabilities not stored. Ensure run() was called."
             )
         return self.result.metadata[key]
 
@@ -617,7 +622,8 @@ class AttributeInference(BaseAttack):
         # 3. Per-group attribute accuracy
         per_group = self.evaluate_per_group()
         with open(out / "per_group_accuracy.json", "w") as f:
-            json.dump({k: {str(g): v for g, v in d.items()} for k, d in per_group.items()}, f, indent=2)
+            serialised = {k: {str(g): v for g, v in d.items()} for k, d in per_group.items()}
+            json.dump(serialised, f, indent=2)
 
         # 4. ROC curve
         plot_roc_curve(
@@ -680,7 +686,10 @@ class AttributeInference(BaseAttack):
 
         lines.append("")
         lines.append("--- Per-Group Attribute Accuracy ---")
-        for g in sorted(set(per_group.get("member", {}).keys()) | set(per_group.get("nonmember", {}).keys())):
+        all_groups = sorted(
+            set(per_group.get("member", {}).keys()) | set(per_group.get("nonmember", {}).keys())
+        )
+        for g in all_groups:
             mem_acc = per_group.get("member", {}).get(g, 0.0)
             nonmem_acc = per_group.get("nonmember", {}).get(g, 0.0)
             gap = mem_acc - nonmem_acc

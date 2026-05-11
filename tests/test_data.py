@@ -6,12 +6,10 @@ These tests use synthetic data only — no network downloads required.
 from __future__ import annotations
 
 import numpy as np
-import torch
 from torch.utils.data import TensorDataset
 
 from auditml.data import (
     DATASET_INFO,
-    DatasetInfo,
     create_member_nonmember_split,
     get_shadow_data_splits,
     get_transforms,

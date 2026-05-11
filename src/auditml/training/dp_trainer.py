@@ -34,7 +34,6 @@ Abadi et al., "Deep Learning with Differential Privacy", CCS 2016.
 
 from __future__ import annotations
 
-import copy
 import logging
 from pathlib import Path
 from typing import Any
@@ -44,7 +43,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from auditml.config.schema import AuditMLConfig, DPConfig
+from auditml.config.schema import DPConfig
 from auditml.training.trainer import Trainer
 
 logger = logging.getLogger(__name__)

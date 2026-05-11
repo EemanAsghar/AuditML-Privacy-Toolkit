@@ -19,7 +19,6 @@ from pathlib import Path
 from auditml import __version__
 from auditml.config import AuditMLConfig, config_to_dict, default_config, load_config
 
-
 # ---------------------------------------------------------------------------
 # Subcommand handlers
 # ---------------------------------------------------------------------------
@@ -27,11 +26,11 @@ from auditml.config import AuditMLConfig, config_to_dict, default_config, load_c
 
 def _resolve_device(cfg: AuditMLConfig) -> str:
     """Pick the training device from config (supports 'auto')."""
-    import torch
+    from auditml.utils.device import get_device
 
     device = cfg.training.device
     if device == "auto":
-        return "cuda" if torch.cuda.is_available() else "cpu"
+        return str(get_device())
     return device
 
 
@@ -110,7 +109,7 @@ def _handle_train(cfg: AuditMLConfig) -> None:
             device=device,
         )
 
-    history = trainer.train(
+    trainer.train(
         epochs=cfg.training.epochs,
         checkpoint_dir=ckpt_dir,
     )
@@ -131,7 +130,8 @@ def _handle_audit(cfg: AuditMLConfig) -> None:
     import torch
 
     from auditml.attacks import get_attack
-    from auditml.data.datasets import get_dataloaders
+    from auditml.config.schema import AttackType
+    from auditml.data.datasets import get_dataloaders, get_dataset
     from auditml.models import get_model
     from auditml.reporting import ReportGenerator
     from auditml.training import Trainer, build_optimizer
@@ -148,6 +148,9 @@ def _handle_audit(cfg: AuditMLConfig) -> None:
     torch.manual_seed(cfg.training.seed)
 
     # Data
+    full_train_dataset = get_dataset(
+        dataset, train=True, data_dir=cfg.data.data_dir, download=cfg.data.download
+    )
     data = get_dataloaders(
         dataset_name=dataset,
         batch_size=cfg.training.batch_size,
@@ -200,7 +203,10 @@ def _handle_audit(cfg: AuditMLConfig) -> None:
 
     for attack_type in cfg.attacks:
         print(f"[audit] Running {attack_type.value} ...")
-        attack = get_attack(attack_type, model, cfg, device=device)
+        extra = {}
+        if attack_type == AttackType.MIA_SHADOW:
+            extra["shadow_dataset"] = full_train_dataset
+        attack = get_attack(attack_type, model, cfg, device=device, **extra)
         result = attack.run(data["member_loader"], data["nonmember_loader"])
         metrics = attack.evaluate()
         attack_results[attack_type.value] = (attack, result)
@@ -252,7 +258,10 @@ def _handle_audit(cfg: AuditMLConfig) -> None:
         # Need fresh data loaders for DP attacks (same splits)
         for attack_type in cfg.attacks:
             print(f"[audit] Running {attack_type.value} on DP model ...")
-            dp_attack = get_attack(attack_type, dp_model, cfg, device=device)
+            extra = {}
+            if attack_type == AttackType.MIA_SHADOW:
+                extra["shadow_dataset"] = full_train_dataset
+            dp_attack = get_attack(attack_type, dp_model, cfg, device=device, **extra)
             dp_result = dp_attack.run(data["member_loader"], data["nonmember_loader"])
             dp_metrics = dp_attack.evaluate()
             dp_attack_results[attack_type.value] = (dp_attack, dp_result)
@@ -275,23 +284,19 @@ def _handle_audit(cfg: AuditMLConfig) -> None:
     generator.generate(report_dir)
     print(f"[audit] Report saved to {report_dir}")
 
+    # Auto-open HTML report in the browser
+    html_report = report_dir / "report.html"
+    if html_report.exists():
+        import webbrowser
+        webbrowser.open(html_report.as_uri())
+        print(f"[audit] Opening report in browser → {html_report}")
+    else:
+        print(f"[audit] HTML report not found at {html_report} — check logs for errors")
+
 
 def _handle_show_config(cfg: AuditMLConfig) -> None:
     """Print the fully-resolved configuration as JSON."""
     print(json.dumps(config_to_dict(cfg), indent=2))
-
-
-def _handle_ui(_cfg: AuditMLConfig) -> None:
-    """Launch the Streamlit dashboard."""
-    import subprocess
-    from pathlib import Path
-
-    home_py = Path(__file__).parent / "ui" / "Home.py"
-    if not home_py.exists():
-        print(f"Error: UI entry point not found at {home_py}", file=sys.stderr)
-        raise RuntimeError("UI files not found.")
-    print("[ui] Launching AuditML dashboard → http://localhost:8501")
-    subprocess.run([sys.executable, "-m", "streamlit", "run", str(home_py)], check=True)
 
 
 # ---------------------------------------------------------------------------
@@ -323,6 +328,17 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Path to YAML configuration file",
     )
+    audit_p.add_argument(
+        "--attack",
+        dest="attacks",
+        metavar="ATTACK",
+        nargs="+",
+        default=None,
+        help=(
+            "Attack(s) to run, overriding the config. "
+            "Choices: mia_threshold, mia_shadow, model_inversion, attribute_inference"
+        ),
+    )
 
     # -- train ---------------------------------------------------------------
     train_p = subparsers.add_parser(
@@ -348,12 +364,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to YAML configuration file (omit for defaults)",
     )
 
-    # -- ui ------------------------------------------------------------------
-    subparsers.add_parser(
-        "ui",
-        help="Launch the Streamlit web dashboard",
-    )
-
     return parser
 
 
@@ -365,7 +375,6 @@ _HANDLERS = {
     "audit": _handle_audit,
     "train": _handle_train,
     "show-config": _handle_show_config,
-    "ui": _handle_ui,
 }
 
 
@@ -388,6 +397,15 @@ def main(argv: list[str] | None = None) -> int:
             return 1
     else:
         cfg = default_config()
+
+    # Apply CLI overrides before dispatching
+    if args.command == "audit" and getattr(args, "attacks", None):
+        from auditml.config.schema import AttackType
+        try:
+            cfg.attacks = [AttackType(a) for a in args.attacks]
+        except ValueError as exc:
+            print(f"Error: invalid attack name — {exc}", file=sys.stderr)
+            return 1
 
     # Dispatch
     handler = _HANDLERS[args.command]

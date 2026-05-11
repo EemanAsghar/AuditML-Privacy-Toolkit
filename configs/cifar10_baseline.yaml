@@ -1,6 +1,7 @@
 # Baseline training for CIFAR-10
 experiment_name: "baseline_cifar10"
-attacks: []
+attacks:
+  - mia_threshold
 
 data:
   dataset: cifar10
