@@ -43,295 +43,323 @@
     
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-/* ── hide all Material chrome ───────────────────────────────────────── */
-.md-header,.md-tabs,.md-footer,.md-sidebar,
-.md-main__inner>.md-content>article>h1{display:none!important}
-.md-main{margin:0!important}
-.md-main__inner{margin:0!important;max-width:100%!important}
-.md-content{max-width:100%!important}
-.md-content__inner{margin:0!important;padding:0!important}
+/* ── kill Material chrome ───────────────────────────────────────────── */
+.md-header,.md-tabs,.md-footer,.md-sidebar{display:none!important}
+
+/* ── CRITICAL: break the Material grid so content is full-width ─────── */
+.md-main{padding:0!important;margin:0!important}
+.md-main>.md-main__inner,
+.md-main__inner.md-grid{
+  display:block!important;
+  max-width:100%!important;
+  width:100%!important;
+  padding:0!important;
+  margin:0!important;
+  grid-template-columns:none!important;
+  grid-template-rows:none!important;
+}
+.md-content,.md-content__inner{
+  max-width:100%!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+}
+/* kill Material typeset overrides on our page */
+article.md-content__inner h1,
+.md-typeset h1{
+  font-family:inherit!important;
+  font-size:inherit!important;
+  font-weight:inherit!important;
+  color:inherit!important;
+  letter-spacing:inherit!important;
+  line-height:inherit!important;
+  margin:0!important;
+  padding:0!important;
+  border:none!important;
+}
 
 /* ── scoped reset ───────────────────────────────────────────────────── */
 .lp *,.lp *::before,.lp *::after{box-sizing:border-box;margin:0;padding:0}
 .lp ul,.lp ol,.lp li{list-style:none!important;list-style-type:none!important;padding-left:0!important;margin:0!important}
 .lp li{display:block}
 .lp a{color:inherit;text-decoration:none}
-.lp img{display:block;max-width:100%}
 
 /* ── tokens ─────────────────────────────────────────────────────────── */
 .lp{
-  --ink:    #0a0a0a;
-  --ink2:   #888884;
-  --ink3:   #555550;
-  --bg:     #fafaf9;
-  --bg2:    #f3f3f1;
-  --border: rgba(0,0,0,0.07);
-  --indigo: #4f46e5;
-  --w:      1180px;
+  --ink:   #0a0a0a;
+  --ink2:  #888884;
+  --ink3:  #555550;
+  --bg:    #fafaf9;
+  --bg2:   #f3f3f1;
+  --bdr:   rgba(0,0,0,0.07);
+  --w:     1180px;
+  width:100%;
   font-family:'Inter',system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;
   background:var(--bg);
   color:var(--ink);
+  overflow-x:hidden;
 }
 
 /* ─────────────────────────────────────────────────────────────────────
-   TUBE NAV — floating dark pill, centered
+   TUBE NAV
    ───────────────────────────────────────────────────────────────────── */
-.lp-nav{
+.lp .lp-nav{
   position:fixed;top:14px;
   left:50%;transform:translateX(-50%);
-  width:calc(100% - 2rem);
-  max-width:820px;
-  height:50px;
-  background:rgba(8,8,8,0.88);
+  width:calc(100% - 2rem);max-width:820px;height:50px;
+  background:rgba(8,8,8,0.9);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:14px;
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   z-index:999;
-  display:flex;align-items:center;
-  padding:0 1.1rem;
-  gap:1rem;
+  display:flex;align-items:center;padding:0 1.1rem;gap:1rem;
 }
-.lp-nav-left{display:flex;align-items:center;gap:.25rem}
-.lp-nav-logo{
+.lp .nav-left{display:flex;align-items:center;gap:.2rem}
+.lp .nav-logo{
   display:flex;align-items:center;gap:.5rem;
-  font-weight:700;font-size:.88rem;letter-spacing:-.02em;color:#fff;
-  padding:0 .6rem;
+  font-weight:700!important;font-size:.88rem!important;
+  color:#fff!important;letter-spacing:-.02em;
+  padding:0 .5rem;
 }
-.lp-nav-logo-mark{
+.lp .nav-mark{
   width:26px;height:26px;border-radius:7px;
   background:#fff;color:#111;
   display:flex;align-items:center;justify-content:center;
   font-size:.72rem;font-weight:900;flex-shrink:0;
 }
-.lp-nav-right{display:flex;align-items:center;gap:.25rem;margin-left:auto}
-.lp-nav a.nl{
+.lp .nav-right{display:flex;align-items:center;gap:.2rem;margin-left:auto}
+.lp .lp-nav a.nl{
   padding:.35rem .75rem;border-radius:8px;
-  font-size:.8rem;font-weight:500;color:rgba(255,255,255,.55);
+  font-size:.8rem!important;font-weight:500!important;
+  color:rgba(255,255,255,.5)!important;
   transition:color .15s,background .15s;white-space:nowrap;
 }
-.lp-nav a.nl:hover{color:#fff;background:rgba(255,255,255,.07)}
-.lp-nav a.nc{
-  background:#fff;color:#111;
-  padding:.35rem .9rem;border-radius:8px;
-  font-size:.8rem;font-weight:700;
+.lp .lp-nav a.nl:hover{color:#fff!important;background:rgba(255,255,255,.07)!important}
+.lp .lp-nav a.nc{
+  background:#fff!important;color:#111!important;
+  padding:.35rem .9rem!important;border-radius:8px;
+  font-size:.8rem!important;font-weight:700!important;
   transition:opacity .2s;white-space:nowrap;
+  display:inline-flex;align-items:center;
 }
-.lp-nav a.nc:hover{opacity:.8}
+.lp .lp-nav a.nc:hover{opacity:.8}
 
 /* ─────────────────────────────────────────────────────────────────────
-   HERO — full-bleed dark with indigo glow
+   HERO — full-bleed dark
    ───────────────────────────────────────────────────────────────────── */
-.lp-hero{
+.lp .hero{
   width:100%;
-  background:#080808;
+  background:#080808!important;
   background-image:
-    radial-gradient(ellipse 100% 80% at 50% -5%, rgba(79,70,229,.18) 0%, transparent 65%),
-    radial-gradient(ellipse 60% 40% at 20% 110%, rgba(99,102,241,.08) 0%, transparent 60%);
-  padding:120px 2rem 100px;
+    radial-gradient(ellipse 100% 70% at 50% -5%,rgba(79,70,229,.2) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 30% at 80% 120%,rgba(99,102,241,.07) 0%,transparent 60%)!important;
+  padding:130px 2rem 100px;
   display:flex;flex-direction:column;align-items:center;text-align:center;
 }
-.lp-hero-label{
-  display:inline-flex;align-items:center;gap:.5rem;
-  font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
-  color:rgba(255,255,255,.3);margin-bottom:2rem;
+.lp .hero-label{
+  display:inline-flex;align-items:center;gap:.55rem;
+  font-size:.68rem!important;font-weight:600!important;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.3)!important;margin-bottom:2rem;
 }
-.lp-hero-label::before,.lp-hero-label::after{content:'';width:24px;height:1px;background:rgba(255,255,255,.15)}
-.lp-h1{
-  font-family:'Instrument Serif',Georgia,serif;
-  font-style:italic;
-  font-size:clamp(3rem,6vw,6.5rem);
-  line-height:1.02;
-  letter-spacing:-.01em;
-  color:#fff;
+.lp .hero-label::before,.lp .hero-label::after{
+  content:'';width:22px;height:1px;background:rgba(255,255,255,.15);flex-shrink:0;
+}
+.lp .h1{
+  font-family:'Instrument Serif',Georgia,serif!important;
+  font-style:italic!important;
+  font-size:clamp(3.2rem,6vw,6.5rem)!important;
+  line-height:1.03!important;
+  letter-spacing:-.01em!important;
+  color:#fff!important;
+  font-weight:400!important;
   margin-bottom:1.5rem;
-  max-width:780px;
+  max-width:800px;
 }
-.lp-h1 .accent{
-  color:transparent;
-  background:linear-gradient(135deg,#818cf8 0%,#c084fc 100%);
-  -webkit-background-clip:text;background-clip:text;
+.lp .h1 .acc{
+  background:linear-gradient(135deg,#818cf8 0%,#c084fc 100%)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;
+  -webkit-text-fill-color:transparent!important;color:transparent!important;
 }
-.lp-hero-sub{
-  font-size:1.05rem;color:rgba(255,255,255,.45);
-  line-height:1.75;max-width:460px;margin-bottom:2.5rem;
-  font-weight:400;
+.lp .hero-sub{
+  font-size:1.05rem!important;color:rgba(255,255,255,.42)!important;
+  line-height:1.75!important;max-width:460px;margin-bottom:2.5rem;
+  font-weight:400!important;
 }
-.lp-hero-btns{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;justify-content:center;margin-bottom:4.5rem}
-.btn-p{
+.lp .hero-btns{
+  display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;
+  justify-content:center;margin-bottom:4.5rem;
+}
+.lp .btn-w{
   display:inline-flex;align-items:center;gap:.4rem;
-  background:#fff;color:#111;
-  padding:.7rem 1.6rem;border-radius:10px;
-  font-weight:700;font-size:.875rem;
+  background:#fff;color:#111!important;
+  padding:.72rem 1.65rem;border-radius:10px;
+  font-weight:700!important;font-size:.875rem!important;
   transition:opacity .2s,transform .15s;
 }
-.btn-p:hover{opacity:.85;transform:translateY(-1px)}
-.btn-s{
+.lp .btn-w:hover{opacity:.85;transform:translateY(-1px)}
+.lp .btn-g{
   display:inline-flex;align-items:center;gap:.4rem;
-  background:rgba(255,255,255,.07);color:rgba(255,255,255,.75);
-  border:1px solid rgba(255,255,255,.12);
-  padding:.7rem 1.6rem;border-radius:10px;
-  font-weight:600;font-size:.875rem;
+  background:rgba(255,255,255,.06);color:rgba(255,255,255,.72)!important;
+  border:1px solid rgba(255,255,255,.11);
+  padding:.72rem 1.65rem;border-radius:10px;
+  font-weight:600!important;font-size:.875rem!important;
   transition:background .2s,border-color .2s;
 }
-.btn-s:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);color:#fff}
+.lp .btn-g:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.2);color:#fff!important}
 
-/* ── code window ─────────────────────────────────────────────────────── */
-.lp-win{
+/* code window */
+.lp .win{
   width:100%;max-width:680px;
-  background:#111;
-  border:1px solid rgba(255,255,255,.07);
+  background:#111;border:1px solid rgba(255,255,255,.06);
   border-radius:14px;overflow:hidden;
-  box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03);
+  box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.02);
   text-align:left;
 }
-.lp-win-bar{
+.lp .win-bar{
   background:#181818;padding:.7rem 1rem;
   display:flex;align-items:center;gap:.38rem;
 }
-.lp-win-bar span{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:#333}
+.lp .win-bar span{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:#333}
 .dot{width:10px;height:10px;border-radius:50%}
 .dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
-.lp-win-code{
+.lp .win-code{
   padding:1.4rem 1.6rem;
-  font-family:'JetBrains Mono',monospace;
-  font-size:.82rem;line-height:1.9;color:#ccc;
-  overflow-x:auto;
+  font-family:'JetBrains Mono',monospace!important;
+  font-size:.82rem!important;line-height:1.9!important;
+  color:#bbb!important;overflow-x:auto;
 }
-.kw{color:#c084fc}.fn{color:#60a5fa}.st{color:#34d399}
-.cm{color:#3a3a3a}.op{color:#555}
+.lp .win-code .kw{color:#c084fc!important}
+.lp .win-code .fn{color:#60a5fa!important}
+.lp .win-code .st{color:#34d399!important}
+.lp .win-code .cm{color:#333!important}
+.lp .win-code .op{color:#444!important}
 
 /* ─────────────────────────────────────────────────────────────────────
-   STATS
+   STATS STRIP
    ───────────────────────────────────────────────────────────────────── */
-.lp-stats{border-bottom:1px solid var(--border)}
-.lp-stats-in{
+.lp .stats{width:100%;border-bottom:1px solid var(--bdr)}
+.lp .stats-in{
   max-width:var(--w);margin:0 auto;padding:2.5rem 2.5rem;
   display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;
 }
-.lp-sn{font-size:2rem;font-weight:800;letter-spacing:-.04em;line-height:1;color:var(--ink)}
-.lp-sl{font-size:.78rem;color:var(--ink2);font-weight:500;margin-top:.3rem}
+.lp .sn{font-size:2rem!important;font-weight:800!important;letter-spacing:-.04em;line-height:1;color:var(--ink)!important}
+.lp .sl{font-size:.78rem!important;color:var(--ink2)!important;font-weight:500;margin-top:.3rem}
 
 /* ─────────────────────────────────────────────────────────────────────
-   SECTIONS
+   SECTION WRAPPER
    ───────────────────────────────────────────────────────────────────── */
-.lp-sec{padding:80px 2.5rem}
-.lp-sec-in{max-width:var(--w);margin:0 auto}
-.lp-ey{
-  font-size:.68rem;font-weight:700;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ink2);margin-bottom:.9rem;
-}
-.lp-sh{
-  font-size:clamp(1.7rem,2.5vw,2.5rem);font-weight:800;
-  letter-spacing:-.035em;line-height:1.1;margin-bottom:.85rem;color:var(--ink);
-}
-.lp-sp{font-size:.9rem;color:var(--ink3);line-height:1.7;max-width:440px}
+.lp .sec{width:100%;padding:80px 2.5rem}
+.lp .sec-in{max-width:var(--w);margin:0 auto}
+.lp .ey{font-size:.68rem!important;font-weight:700!important;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)!important;margin-bottom:.9rem}
+.lp .sh{font-size:clamp(1.7rem,2.5vw,2.5rem)!important;font-weight:800!important;letter-spacing:-.035em;line-height:1.1!important;margin-bottom:.85rem;color:var(--ink)!important}
+.lp .sp{font-size:.9rem!important;color:var(--ink3)!important;line-height:1.7!important;max-width:440px}
 
-/* ── attacks grid ────────────────────────────────────────────────────── */
-.lp-grid{
+/* ─────────────────────────────────────────────────────────────────────
+   ATTACKS GRID
+   ───────────────────────────────────────────────────────────────────── */
+.lp .grid{
   display:grid;grid-template-columns:repeat(2,1fr);
-  border:1px solid var(--border);border-radius:14px;
+  border:1px solid var(--bdr);border-radius:14px;
   overflow:hidden;margin-top:3rem;
 }
-.lp-card{
-  padding:2rem 2.25rem;border-bottom:1px solid var(--border);
+.lp .card{
+  padding:2rem 2.25rem;border-bottom:1px solid var(--bdr);
   transition:background .15s;
 }
-.lp-card:nth-child(odd){border-right:1px solid var(--border)}
-.lp-card:nth-last-child(-n+2){border-bottom:none}
-.lp-card:hover{background:var(--bg2)}
-.lp-badge{
-  display:inline-block;font-size:.63rem;font-weight:700;
+.lp .card:nth-child(odd){border-right:1px solid var(--bdr)}
+.lp .card:nth-last-child(-n+2){border-bottom:none}
+.lp .card:hover{background:var(--bg2)}
+.lp .badge{
+  display:inline-block;font-size:.62rem!important;font-weight:700!important;
   letter-spacing:.07em;text-transform:uppercase;
   padding:.18rem .6rem;border-radius:4px;margin-bottom:.85rem;
 }
-.bg-g{background:#d1fae5;color:#065f46}
-.bg-y{background:#fef3c7;color:#78350f}
-.bg-p{background:#ede9fe;color:#4c1d95}
-.bg-r{background:#fee2e2;color:#7f1d1d}
-.lp-card h3{font-size:.95rem;font-weight:700;letter-spacing:-.015em;margin-bottom:.45rem}
-.lp-card p{font-size:.83rem;color:var(--ink3);line-height:1.6;margin-bottom:.9rem}
-.lp-card-meta{display:flex;gap:1.1rem;flex-wrap:wrap}
-.lp-card-meta span{font-size:.72rem;color:var(--ink2);font-weight:500;
-  background:var(--bg2);padding:.15rem .5rem;border-radius:4px;
-  border:1px solid var(--border)}
+.bg-g{background:#d1fae5;color:#065f46!important}
+.bg-y{background:#fef3c7;color:#78350f!important}
+.bg-p{background:#ede9fe;color:#4c1d95!important}
+.bg-r{background:#fee2e2;color:#7f1d1d!important}
+.lp .card h3{font-size:.95rem!important;font-weight:700!important;letter-spacing:-.015em;margin-bottom:.45rem;color:var(--ink)!important}
+.lp .card p{font-size:.83rem!important;color:var(--ink3)!important;line-height:1.6!important;margin-bottom:.9rem}
+.lp .card-meta{display:flex;gap:.75rem;flex-wrap:wrap}
+.lp .card-meta span{
+  font-size:.72rem!important;color:var(--ink3)!important;font-weight:500;
+  background:var(--bg2);padding:.15rem .55rem;border-radius:4px;
+  border:1px solid var(--bdr);
+}
 
 /* ─────────────────────────────────────────────────────────────────────
    INSTALL (dark)
    ───────────────────────────────────────────────────────────────────── */
-.lp-install{background:#080808}
-.lp-install .lp-ey{color:#444}
-.lp-install .lp-sh{color:#fff}
-.lp-install .lp-sp{color:#555}
-.lp-ig{
+.lp .install{width:100%;background:#080808!important;padding:80px 2.5rem}
+.lp .install .ey{color:#444!important}
+.lp .install .sh{color:#fff!important}
+.lp .install .sp{color:#4a4a4a!important}
+.lp .ig{
+  max-width:var(--w);margin:0 auto;
   display:grid;grid-template-columns:1fr 1.15fr;
-  gap:4.5rem;align-items:center;margin-top:3rem;
+  gap:4.5rem;align-items:center;
 }
-.lp-pip{
-  background:#111;border:1px solid #1f1f1f;border-radius:9px;
+.lp .pip{
+  background:#111;border:1px solid #1c1c1c;border-radius:9px;
   display:flex;align-items:center;justify-content:space-between;
   padding:.85rem 1.1rem;margin:1.25rem 0 .75rem;
 }
-.lp-pip code{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:#34d399}
-.lp-cpybtn{
-  background:#1a1a1a;border:1px solid #2a2a2a;color:#555;
+.lp .pip code{font-family:'JetBrains Mono',monospace!important;font-size:.88rem!important;color:#34d399!important;background:transparent!important;padding:0!important}
+.lp .cpybtn{
+  background:#1a1a1a;border:1px solid #252525;color:#4a4a4a;
   font-size:.7rem;padding:.28rem .6rem;border-radius:5px;
   cursor:pointer;font-family:'JetBrains Mono',monospace;
   transition:background .15s,color .15s;
 }
-.lp-cpybtn:hover{background:#222;color:#aaa}
-.lp-note{font-size:.76rem;color:#444;line-height:1.6}
-.lp-note a{color:#6366f1;font-weight:500}
-.lp-note a:hover{text-decoration:underline}
-.lp-install .lp-win{
-  box-shadow:0 0 0 1px rgba(255,255,255,.05),0 32px 60px rgba(0,0,0,.4);
-}
+.lp .cpybtn:hover{background:#222;color:#aaa}
+.lp .note{font-size:.76rem!important;color:#3a3a3a!important;line-height:1.6!important}
+.lp .note a{color:#6366f1!important;font-weight:500}
+.lp .note a:hover{text-decoration:underline}
+.lp .install .win{max-width:none;box-shadow:0 0 0 1px rgba(255,255,255,.04),0 32px 60px rgba(0,0,0,.4)}
 
 /* ─────────────────────────────────────────────────────────────────────
    FOOTER
    ───────────────────────────────────────────────────────────────────── */
-.lp-foot{
-  background:#060606;border-top:1px solid rgba(255,255,255,.05);
+.lp .foot{
+  width:100%;background:#060606;
+  border-top:1px solid rgba(255,255,255,.04);
   padding:2.5rem 2.5rem;
 }
-.lp-foot-in{
+.lp .foot-in{
   max-width:var(--w);margin:0 auto;
   display:flex;align-items:center;justify-content:space-between;
   flex-wrap:wrap;gap:1.25rem;
 }
-.lp-foot-logo{
-  display:flex;align-items:center;gap:.5rem;
-  font-weight:700;font-size:.88rem;color:#fff;letter-spacing:-.02em;
-}
-.lp-foot-logo .lp-nav-logo-mark{background:#222;color:#888}
-.lp-foot-links{display:flex;gap:1.5rem}
-.lp-foot-links li{display:inline-flex!important}
-.lp-foot-links a{font-size:.78rem;color:#333;font-weight:500;transition:color .15s}
-.lp-foot-links a:hover{color:#777}
-.lp-foot-copy{font-size:.72rem;color:#2a2a2a}
-.lp-foot-copy a{color:#6366f1}
+.lp .foot-logo{display:flex;align-items:center;gap:.5rem;font-weight:700!important;font-size:.88rem!important;color:#fff!important;letter-spacing:-.02em}
+.lp .foot-logo .nav-mark{background:#1c1c1c;color:#555}
+.lp .foot-links{display:flex;gap:1.5rem}
+.lp .foot-links li{display:inline-flex!important}
+.lp .foot-links a{font-size:.78rem!important;color:#2e2e2e!important;font-weight:500;transition:color .15s}
+.lp .foot-links a:hover{color:#666!important}
+.lp .foot-copy{font-size:.72rem!important;color:#252525!important}
+.lp .foot-copy a{color:#5b5bd6!important}
 
 /* ─────────────────────────────────────────────────────────────────────
    RESPONSIVE
    ───────────────────────────────────────────────────────────────────── */
 @media(max-width:860px){
-  .lp-grid{grid-template-columns:1fr}
-  .lp-card:nth-child(odd){border-right:none}
-  .lp-card:nth-last-child(-n+2){border-bottom:1px solid var(--border)}
-  .lp-card:last-child{border-bottom:none}
-  .lp-ig{grid-template-columns:1fr;gap:2.5rem}
-  .lp-stats-in{grid-template-columns:repeat(2,1fr)}
-  .lp-nav-left .nl:not(:last-child){display:none}
+  .lp .grid{grid-template-columns:1fr}
+  .lp .card:nth-child(odd){border-right:none}
+  .lp .card:nth-last-child(-n+2){border-bottom:1px solid var(--bdr)}
+  .lp .card:last-child{border-bottom:none}
+  .lp .ig{grid-template-columns:1fr;gap:2.5rem}
+  .lp .stats-in{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:540px){
-  .lp-h1{font-size:2.8rem}
-  .lp-hero-btns{flex-direction:column;align-items:center}
-  .lp-foot-in{flex-direction:column;gap:1rem}
-  .lp-foot-links{flex-wrap:wrap;gap:.85rem}
-  .lp-nav-left{display:none}
-  .lp-sec,.lp-install{padding:60px 1.25rem}
-  .lp-stats-in{padding:2rem 1.25rem}
+  .lp .h1{font-size:2.8rem!important}
+  .lp .hero-btns{flex-direction:column;align-items:center}
+  .lp .foot-in{flex-direction:column;gap:1rem}
+  .lp .foot-links{flex-wrap:wrap;gap:.75rem}
+  .lp .nav-left{display:none}
+  .lp .sec,.lp .install{padding:60px 1.25rem}
+  .lp .stats-in{padding:2rem 1.25rem}
 }
 </style>
 
@@ -1352,60 +1380,53 @@
                 
 <div class="lp">
 
-<!-- ── FLOATING TUBE NAV ─────────────────────────────────────────────── -->
+<!-- TUBE NAV -->
 <nav class="lp-nav">
-  <div class="lp-nav-left">
+  <div class="nav-left">
     <a href="#attacks" class="nl">Attacks</a>
     <a href="guide/quickstart/" class="nl">Docs</a>
     <a href="api/attacks/" class="nl">API</a>
   </div>
-
-  <a href="." class="lp-nav-logo">
-    <div class="lp-nav-logo-mark">A</div>
-    AuditML
+  <a href="." class="nav-logo">
+    <div class="nav-mark">A</div>AuditML
   </a>
-
-  <div class="lp-nav-right">
-    <a href="https://github.com/EemanAsghar/AuditML-Privacy-Toolkit" target="_blank" rel="noopener" class="nc">
-      GitHub ↗
-    </a>
+  <div class="nav-right">
+    <a href="https://github.com/EemanAsghar/AuditML-Privacy-Toolkit" target="_blank" rel="noopener" class="nc">GitHub ↗</a>
   </div>
 </nav>
 
-<!-- ── HERO ──────────────────────────────────────────────────────────── -->
-<section class="lp-hero">
-  <div class="lp-hero-label">Privacy Auditing Toolkit for PyTorch</div>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">Privacy Auditing Toolkit for PyTorch</div>
 
-  <h1 class="lp-h1">
+  <h1 class="h1">
     Know what your<br/>
-    model <span class="accent">leaks.</span>
+    model <span class="acc">leaks.</span>
   </h1>
 
-  <p class="lp-hero-sub">
+  <p class="hero-sub">
     One function call audits any PyTorch model for membership
     inference, model inversion, and attribute inference attacks —
     with an interactive HTML report.
   </p>
 
-  <div class="lp-hero-btns">
-    <a href="#install" class="btn-p">Get started →</a>
-    <a href="guide/quickstart/" class="btn-s">Read the docs</a>
+  <div class="hero-btns">
+    <a href="#install" class="btn-w">Get started →</a>
+    <a href="guide/quickstart/" class="btn-g">Read the docs</a>
   </div>
 
-  <div class="lp-win">
-    <div class="lp-win-bar">
-      <div class="dot dot-r"></div>
-      <div class="dot dot-y"></div>
-      <div class="dot dot-g"></div>
+  <div class="win">
+    <div class="win-bar">
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
       <span>audit.py</span>
     </div>
-    <div class="lp-win-code">
+    <div class="win-code">
 <span class="kw">import</span> auditml<br/>
 <br/>
 <span class="cm"># Split training set → members / non-members</span><br/>
 m, nm <span class="op">=</span> <span class="fn">auditml.split_loaders</span>(train_dataset)<br/>
 <br/>
-<span class="cm"># Audit any nn.Module — all 4 attacks by default</span><br/>
+<span class="cm"># Audit any nn.Module</span><br/>
 results <span class="op">=</span> <span class="fn">auditml.audit</span>(model, m, nm)<br/>
 <br/>
 <span class="fn">print</span>(results.<span class="fn">summary</span>())<br/>
@@ -1413,92 +1434,78 @@ results <span class="op">=</span> <span class="fn">auditml.audit</span>(model, m
 <span class="cm">#  model_inversion  AUC 0.571</span><br/>
 <br/>
 <span class="cm"># Open interactive HTML report in browser</span><br/>
-results.<span class="fn">report</span>(<span class="st">"./report"</span>, open_browser<span class="op">=</span><span class="kw">True</span>)
+results.<span class="fn">report</span>(<span class="st">"./report"</span>, open_browser<span class="op">=True</span>)
     </div>
   </div>
 </section>
 
-<!-- ── STATS ─────────────────────────────────────────────────────────── -->
-<div class="lp-stats">
-  <div class="lp-stats-in">
-    <div><div class="lp-sn">4</div><div class="lp-sl">Privacy attacks</div></div>
-    <div><div class="lp-sn">418</div><div class="lp-sl">Tests passing</div></div>
-    <div><div class="lp-sn">91%</div><div class="lp-sl">Code coverage</div></div>
-    <div><div class="lp-sn">MIT</div><div class="lp-sl">Open source</div></div>
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-in">
+    <div><div class="sn">4</div><div class="sl">Privacy attacks</div></div>
+    <div><div class="sn">418</div><div class="sl">Tests passing</div></div>
+    <div><div class="sn">91%</div><div class="sl">Code coverage</div></div>
+    <div><div class="sn">MIT</div><div class="sl">Open source</div></div>
   </div>
 </div>
 
-<!-- ── ATTACKS ───────────────────────────────────────────────────────── -->
-<section class="lp-sec" id="attacks">
-  <div class="lp-sec-in">
-    <div class="lp-ey">Privacy Attacks</div>
-    <h2 class="lp-sh">Four attacks. One unified API.</h2>
-    <p class="lp-sp">Each attack exposes a different kind of leakage. Run them all or pick only what you need.</p>
-
-    <div class="lp-grid">
-      <div class="lp-card">
-        <span class="lp-badge bg-g">Fast · seconds</span>
+<!-- ATTACKS -->
+<section class="sec" id="attacks">
+  <div class="sec-in">
+    <div class="ey">Privacy Attacks</div>
+    <h2 class="sh">Four attacks. One unified API.</h2>
+    <p class="sp">Each attack exposes a different kind of leakage. Run them all or pick only what you need.</p>
+    <div class="grid">
+      <div class="card">
+        <span class="badge bg-g">Fast · seconds</span>
         <h3>Threshold MIA</h3>
         <p>Classifies members vs non-members by thresholding the model's loss or confidence. Fast and surprisingly effective.</p>
-        <div class="lp-card-meta">
-          <span>White-box</span>
-          <span>Loss / confidence</span>
-        </div>
+        <div class="card-meta"><span>White-box</span><span>Loss / confidence</span></div>
       </div>
-      <div class="lp-card">
-        <span class="lp-badge bg-y">Powerful · minutes</span>
+      <div class="card">
+        <span class="badge bg-y">Powerful · minutes</span>
         <h3>Shadow Model MIA</h3>
         <p>Trains shadow models with known membership labels, then builds an MLP attack classifier on their outputs.</p>
-        <div class="lp-card-meta">
-          <span>Black-box</span>
-          <span>Output distribution</span>
-        </div>
+        <div class="card-meta"><span>Black-box</span><span>Output distribution</span></div>
       </div>
-      <div class="lp-card">
-        <span class="lp-badge bg-p">Visual · gradient</span>
+      <div class="card">
+        <span class="badge bg-p">Visual · gradient</span>
         <h3>Model Inversion</h3>
         <p>Reconstructs representative training images via gradient ascent — exposing what the model has memorised.</p>
-        <div class="lp-card-meta">
-          <span>White-box</span>
-          <span>Gradients + TV loss</span>
-        </div>
+        <div class="card-meta"><span>White-box</span><span>Gradients + TV loss</span></div>
       </div>
-      <div class="lp-card">
-        <span class="lp-badge bg-r">Sensitive attribute</span>
+      <div class="card">
+        <span class="badge bg-r">Sensitive attribute</span>
         <h3>Attribute Inference</h3>
         <p>Predicts sensitive group membership from softmax outputs — revealing whether the model leaks protected attributes.</p>
-        <div class="lp-card-meta">
-          <span>Black-box</span>
-          <span>Softmax outputs</span>
-        </div>
+        <div class="card-meta"><span>Black-box</span><span>Softmax outputs</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── INSTALL ───────────────────────────────────────────────────────── -->
-<section class="lp-sec lp-install" id="install">
-  <div class="lp-sec-in">
-    <div class="lp-ig">
-      <div>
-        <div class="lp-ey">Get started</div>
-        <h2 class="lp-sh">Up and running<br/>in 60 seconds.</h2>
-        <p class="lp-sp">No account. No API key. Install and call <code style="background:#1a1a1a;padding:.1em .4em;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em;color:#34d399">auditml.audit()</code> on your model.</p>
-        <div class="lp-pip">
-          <code>pip install auditml</code>
-          <button class="lp-cpybtn" onclick="navigator.clipboard.writeText('pip install auditml');this.textContent='✓ copied';setTimeout(()=>this.textContent='copy',2000)">copy</button>
-        </div>
-        <p class="lp-note">Python 3.10+ · PyTorch 2.x<br/><a href="guide/installation/">Full installation guide →</a></p>
+<!-- INSTALL -->
+<div class="install" id="install">
+  <div class="ig">
+    <div>
+      <div class="ey">Get started</div>
+      <h2 class="sh">Up and running<br/>in 60 seconds.</h2>
+      <p class="sp">No account. No API key. Install and call
+        <code style="background:#1a1a1a;padding:.12em .45em;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.84em;color:#34d399">auditml.audit()</code>
+        on your model.</p>
+      <div class="pip">
+        <code>pip install auditml</code>
+        <button class="cpybtn" onclick="navigator.clipboard.writeText('pip install auditml');this.textContent='✓ copied';setTimeout(()=>this.textContent='copy',2000)">copy</button>
       </div>
-      <div>
-        <div class="lp-win" style="max-width:none">
-          <div class="lp-win-bar">
-            <div class="dot dot-r"></div>
-            <div class="dot dot-y"></div>
-            <div class="dot dot-g"></div>
-            <span>full_example.py</span>
-          </div>
-          <div class="lp-win-code">
+      <p class="note">Python 3.10+ · PyTorch 2.x<br/><a href="guide/installation/">Full installation guide →</a></p>
+    </div>
+    <div>
+      <div class="win" style="max-width:none">
+        <div class="win-bar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <span>full_example.py</span>
+        </div>
+        <div class="win-code">
 <span class="kw">import</span> auditml<br/>
 <br/>
 m, nm <span class="op">=</span> <span class="fn">auditml.split_loaders</span>(train_dataset)<br/>
@@ -1509,29 +1516,27 @@ results[<span class="st">"mia_threshold"</span>].auc_roc   <span class="cm"># �
 results.<span class="fn">is_vulnerable</span>()           <span class="cm"># → True</span><br/>
 <br/>
 <span class="cm"># HTML report + save / reload</span><br/>
-results.<span class="fn">report</span>(<span class="st">"./report"</span>, open_browser<span class="op">=</span><span class="kw">True</span>)<br/>
+results.<span class="fn">report</span>(<span class="st">"./report"</span>, open_browser<span class="op">=True</span>)<br/>
 results.<span class="fn">save</span>(<span class="st">"results.json"</span>)
-          </div>
         </div>
       </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ── FOOTER ────────────────────────────────────────────────────────── -->
-<footer class="lp-foot">
-  <div class="lp-foot-in">
-    <div class="lp-foot-logo">
-      <div class="lp-nav-logo-mark">A</div>
-      AuditML
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="foot-in">
+    <div class="foot-logo">
+      <div class="nav-mark">A</div>AuditML
     </div>
-    <ul class="lp-foot-links">
+    <ul class="foot-links">
       <li><a href="#attacks">Attacks</a></li>
       <li><a href="guide/quickstart/">Docs</a></li>
       <li><a href="api/attacks/">API</a></li>
       <li><a href="https://github.com/EemanAsghar/AuditML-Privacy-Toolkit" target="_blank" rel="noopener">GitHub</a></li>
     </ul>
-    <p class="lp-foot-copy">MIT · <a href="https://github.com/EemanAsghar">Eeman Asghar</a> · NUML Faisalabad 2025</p>
+    <p class="foot-copy">MIT · <a href="https://github.com/EemanAsghar">Eeman Asghar</a> · NUML Faisalabad 2025</p>
   </div>
 </footer>
 
