@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.x-orange)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Docs](https://img.shields.io/badge/docs-mkdocs-blueviolet)](https://eemanasghar.github.io/AuditML/)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-blueviolet)](https://eemanasghar.github.io/AuditML-Privacy-Toolkit/)
 
 AuditML lets you measure how much private information leaks from a trained PyTorch model.
 One function call audits your model for membership inference, model inversion, and attribute
@@ -64,8 +64,8 @@ pip install auditml
 Or from source:
 
 ```bash
-git clone https://github.com/EemanAsghar/AuditML.git
-cd AuditML
+git clone https://github.com/EemanAsghar/AuditML-Privacy-Toolkit.git
+cd AuditML-Privacy-Toolkit
 pip install -e ".[dev]"
 ```
 
@@ -219,7 +219,7 @@ compute_ssim  (pixels=784)
 
 ## Documentation
 
-Full documentation at **[eemanasghar.github.io/AuditML](https://eemanasghar.github.io/AuditML/)**
+Full documentation at **[eemanasghar.github.io/AuditML-Privacy-Toolkit](https://eemanasghar.github.io/AuditML-Privacy-Toolkit/)**
 
 ---
 

@@ -15,8 +15,8 @@ pip install auditml
 ## Install from source
 
 ```bash
-git clone https://github.com/EemanAsghar/AuditML.git
-cd AuditML
+git clone https://github.com/EemanAsghar/AuditML-Privacy-Toolkit.git
+cd AuditML-Privacy-Toolkit
 pip install -e ".[dev]"
 ```
 

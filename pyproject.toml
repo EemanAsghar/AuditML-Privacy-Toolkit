@@ -38,10 +38,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/EemanAsghar/AuditML"
-Documentation = "https://eemanasghar.github.io/AuditML/"
-Repository = "https://github.com/EemanAsghar/AuditML"
-"Bug Tracker" = "https://github.com/EemanAsghar/AuditML/issues"
+Homepage = "https://github.com/EemanAsghar/AuditML-Privacy-Toolkit"
+Documentation = "https://eemanasghar.github.io/AuditML-Privacy-Toolkit/"
+Repository = "https://github.com/EemanAsghar/AuditML-Privacy-Toolkit"
+"Bug Tracker" = "https://github.com/EemanAsghar/AuditML-Privacy-Toolkit/issues"
 
 [project.optional-dependencies]
 dev = [

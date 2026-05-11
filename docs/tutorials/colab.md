@@ -11,8 +11,8 @@ Open a new Colab notebook and run:
 !pip install auditml opacus torchvision maturin
 
 # Clone the repo (to get configs and scripts)
-!git clone https://github.com/EemanAsghar/AuditML.git
-%cd AuditML
+!git clone https://github.com/EemanAsghar/AuditML-Privacy-Toolkit.git
+%cd AuditML-Privacy-Toolkit
 ```
 
 ## Check GPU availability

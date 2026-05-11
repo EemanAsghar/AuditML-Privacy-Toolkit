@@ -39,4 +39,4 @@ MIT License. See `LICENSE` in the repository root.
 
 ## Source
 
-[github.com/EemanAsghar/AuditML](https://github.com/EemanAsghar/AuditML)
+[github.com/EemanAsghar/AuditML-Privacy-Toolkit](https://github.com/EemanAsghar/AuditML-Privacy-Toolkit)

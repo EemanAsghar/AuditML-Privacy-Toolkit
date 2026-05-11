@@ -1,9 +1,9 @@
 site_name: AuditML
 site_description: Privacy Auditing Toolkit for PyTorch Models
 site_author: Eeman Asghar
-site_url: https://eemanasghar.github.io/AuditML/
-repo_url: https://github.com/EemanAsghar/AuditML
-repo_name: EemanAsghar/AuditML
+site_url: https://eemanasghar.github.io/AuditML-Privacy-Toolkit/
+repo_url: https://github.com/EemanAsghar/AuditML-Privacy-Toolkit
+repo_name: EemanAsghar/AuditML-Privacy-Toolkit
 
 theme:
   name: material
