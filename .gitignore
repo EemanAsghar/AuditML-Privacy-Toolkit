@@ -88,6 +88,12 @@ datasets/
 site/
 
 ############################
+# Rust build artifacts
+############################
+rust/target/
+dist/
+
+############################
 # FYP / project planning docs (private)
 ############################
 auditmldocu/
