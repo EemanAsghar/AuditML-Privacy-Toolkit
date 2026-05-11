@@ -27,10 +27,11 @@
     
     
       
-        <title>AuditML</title>
+        <title>AuditML — Privacy Auditing for PyTorch Models - AuditML</title>
       
     
     
+
       <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
       
         
@@ -40,6 +41,122 @@
 
 
     
+<style>
+  .md-header, .md-tabs, .md-footer, .md-sidebar--primary,
+  .md-sidebar--secondary, .md-content > article > h1 {
+    display: none !important;
+  }
+  .md-main { margin: 0 !important; }
+  .md-main__inner { margin: 0 !important; max-width: 100% !important; }
+  .md-content { max-width: 100% !important; }
+  .md-content__inner { margin: 0 !important; padding: 0 !important; }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --bg:#ffffff; --bg-subtle:#f8fafc; --bg-muted:#f1f5f9; --border:#e2e8f0;
+    --text:#0f172a; --text-2:#475569; --text-3:#94a3b8;
+    --accent:#6366f1; --accent-2:#818cf8; --accent-bg:#eef2ff;
+    --code-bg:#0f172a; --code-text:#e2e8f0;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; -webkit-font-smoothing:antialiased; }
+  a { color:inherit; text-decoration:none; }
+
+  nav.lp { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(255,255,255,0.85); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+  .nav-inner { max-width:1100px; margin:0 auto; padding:0 1.5rem; height:60px; display:flex; align-items:center; justify-content:space-between; }
+  .nav-logo { display:flex; align-items:center; gap:0.5rem; font-weight:800; font-size:1.1rem; color:var(--text); }
+  .nav-logo .logo-icon { width:28px; height:28px; background:var(--accent); border-radius:7px; display:flex; align-items:center; justify-content:center; color:white; font-size:0.85rem; font-weight:900; }
+  .nav-links { display:flex; align-items:center; gap:0.25rem; list-style:none; }
+  .nav-links a { padding:0.4rem 0.9rem; border-radius:8px; font-size:0.9rem; font-weight:500; color:var(--text-2); transition:color 0.15s,background 0.15s; }
+  .nav-links a:hover { background:var(--bg-muted); color:var(--text); }
+  .nav-cta { background:var(--text) !important; color:white !important; border-radius:8px; padding:0.4rem 1rem !important; font-weight:600 !important; }
+  .nav-cta:hover { opacity:0.85 !important; }
+
+  .hero { padding:140px 1.5rem 100px; text-align:center; max-width:860px; margin:0 auto; }
+  .hero-badge { display:inline-flex; align-items:center; gap:0.5rem; background:var(--accent-bg); color:var(--accent); border:1px solid #c7d2fe; border-radius:999px; padding:0.3rem 0.9rem; font-size:0.82rem; font-weight:600; margin-bottom:2rem; }
+  .hero-badge .dot { width:7px; height:7px; background:var(--accent); border-radius:50%; }
+  .hero h1 { font-size:clamp(2.6rem,5.5vw,4.2rem); font-weight:900; line-height:1.08; letter-spacing:-0.03em; color:var(--text); margin-bottom:1.25rem; }
+  .hero h1 .grad { background:linear-gradient(135deg,var(--accent) 0%,#a78bfa 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .hero p { font-size:1.2rem; color:var(--text-2); max-width:580px; margin:0 auto 2.5rem; line-height:1.7; }
+  .hero-actions { display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; margin-bottom:3.5rem; }
+  .btn-primary { background:var(--accent); color:white; padding:0.75rem 1.75rem; border-radius:10px; font-weight:700; font-size:1rem; transition:transform 0.15s,box-shadow 0.15s; box-shadow:0 4px 14px rgba(99,102,241,0.35); }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(99,102,241,0.45); }
+  .btn-secondary { background:var(--bg); color:var(--text); border:1.5px solid var(--border); padding:0.75rem 1.75rem; border-radius:10px; font-weight:600; font-size:1rem; transition:border-color 0.15s,background 0.15s; }
+  .btn-secondary:hover { border-color:var(--text-3); background:var(--bg-subtle); }
+
+  .code-window { background:var(--code-bg); border-radius:14px; overflow:hidden; text-align:left; box-shadow:0 20px 60px rgba(0,0,0,0.18),0 0 0 1px rgba(255,255,255,0.06); max-width:640px; margin:0 auto; }
+  .code-titlebar { background:#1e293b; padding:0.75rem 1rem; display:flex; align-items:center; gap:0.5rem; }
+  .dot-r{width:12px;height:12px;border-radius:50%;background:#ff5f57;} .dot-y{width:12px;height:12px;border-radius:50%;background:#febc2e;} .dot-g{width:12px;height:12px;border-radius:50%;background:#28c840;}
+  .code-titlebar span { margin-left:auto; font-size:0.78rem; font-family:'JetBrains Mono',monospace; color:#475569; }
+  .code-body { padding:1.5rem 1.75rem; font-family:'JetBrains Mono',monospace; font-size:0.88rem; line-height:1.8; color:var(--code-text); overflow-x:auto; }
+  .cm{color:#64748b;} .ck{color:#c084fc;} .cf{color:#60a5fa;} .cs{color:#34d399;} .co{color:#fb923c;} .cn{color:#f1f5f9;}
+
+  .stats { border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:var(--bg-subtle); padding:2.5rem 1.5rem; }
+  .stats-inner { max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; text-align:center; }
+  .stat-item .num { font-size:2rem; font-weight:900; color:var(--text); letter-spacing:-0.03em; }
+  .stat-item .label { font-size:0.88rem; color:var(--text-2); font-weight:500; margin-top:0.15rem; }
+
+  section.lp { padding:100px 1.5rem; }
+  .section-inner { max-width:1100px; margin:0 auto; }
+  .section-tag { display:inline-block; background:var(--accent-bg); color:var(--accent); border-radius:6px; padding:0.2rem 0.65rem; font-size:0.78rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:1rem; }
+  .section-title { font-size:clamp(1.75rem,3vw,2.5rem); font-weight:800; line-height:1.15; letter-spacing:-0.02em; margin-bottom:1rem; color:var(--text); }
+  .section-sub { font-size:1.05rem; color:var(--text-2); max-width:540px; line-height:1.7; }
+
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; margin-top:3.5rem; }
+  .step { background:var(--bg-subtle); border:1px solid var(--border); border-radius:16px; padding:2rem; transition:box-shadow 0.2s,transform 0.2s; }
+  .step:hover { box-shadow:0 8px 30px rgba(0,0,0,0.07); transform:translateY(-2px); }
+  .step-num { font-size:0.78rem; font-weight:800; color:var(--accent); letter-spacing:0.1em; font-family:'JetBrains Mono',monospace; margin-bottom:1.25rem; }
+  .step-icon { font-size:1.75rem; margin-bottom:0.75rem; }
+  .step h3 { font-size:1.1rem; font-weight:700; margin-bottom:0.5rem; color:var(--text); }
+  .step p { font-size:0.93rem; color:var(--text-2); line-height:1.65; }
+  .step .step-code { margin-top:1rem; background:var(--code-bg); border-radius:8px; padding:0.75rem 1rem; font-family:'JetBrains Mono',monospace; font-size:0.8rem; color:var(--code-text); overflow-x:auto; }
+
+  .attacks-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.5rem; margin-top:3.5rem; }
+  .attack-card { border:1.5px solid var(--border); border-radius:16px; padding:2rem; background:var(--bg); transition:border-color 0.2s,box-shadow 0.2s,transform 0.2s; position:relative; overflow:hidden; }
+  .attack-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); opacity:0; transition:opacity 0.2s; }
+  .attack-card:hover { border-color:#c7d2fe; box-shadow:0 8px 30px rgba(99,102,241,0.08); transform:translateY(-2px); }
+  .attack-card:hover::before { opacity:1; }
+  .attack-icon { font-size:1.6rem; margin-bottom:0.75rem; }
+  .attack-badge { display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:0.15rem 0.6rem; border-radius:5px; margin-bottom:0.75rem; }
+  .badge-fast{background:#dcfce7;color:#16a34a;} .badge-powerful{background:#fef3c7;color:#d97706;} .badge-visual{background:#ede9fe;color:#7c3aed;} .badge-sensitive{background:#fee2e2;color:#dc2626;}
+  .attack-card h3 { font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.5rem; }
+  .attack-card p { font-size:0.92rem; color:var(--text-2); line-height:1.65; margin-bottom:1.25rem; }
+  .attack-meta { display:flex; gap:1.25rem; }
+  .attack-meta-item { font-size:0.82rem; color:var(--text-3); display:flex; align-items:center; gap:0.35rem; }
+  .attack-meta-item .tag { font-weight:600; color:var(--text-2); }
+
+  .install-section { background:var(--bg-subtle); }
+  .install-grid { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center; margin-top:3.5rem; }
+  .install-left h2 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:1rem; }
+  .install-left p { font-size:1rem; color:var(--text-2); line-height:1.7; margin-bottom:1.75rem; }
+  .pip-box { background:var(--code-bg); border-radius:10px; display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1.25rem; margin-bottom:1rem; }
+  .pip-box code { font-family:'JetBrains Mono',monospace; font-size:0.95rem; color:#34d399; }
+  .copy-btn { background:#1e293b; border:none; color:#94a3b8; font-size:0.78rem; padding:0.3rem 0.7rem; border-radius:6px; cursor:pointer; font-family:'JetBrains Mono',monospace; transition:background 0.15s,color 0.15s; }
+  .copy-btn:hover { background:#334155; color:#e2e8f0; }
+  .install-note { font-size:0.83rem; color:var(--text-3); }
+  .install-note a { color:var(--accent); font-weight:600; }
+  .install-right .code-window { max-width:none; }
+
+  footer.lp { border-top:1px solid var(--border); background:var(--bg-subtle); padding:3rem 1.5rem; }
+  .footer-inner { max-width:1100px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem; }
+  .footer-logo { font-weight:800; font-size:1rem; display:flex; align-items:center; gap:0.5rem; color:var(--text); }
+  .footer-links { display:flex; gap:1.5rem; list-style:none; }
+  .footer-links a { font-size:0.88rem; color:var(--text-2); font-weight:500; transition:color 0.15s; }
+  .footer-links a:hover { color:var(--text); }
+  .footer-copy { font-size:0.82rem; color:var(--text-3); }
+  .footer-copy a { color:var(--accent); font-weight:600; }
+
+  @media(max-width:768px){
+    .stats-inner{grid-template-columns:repeat(2,1fr);}
+    .steps{grid-template-columns:1fr;}
+    .attacks-grid{grid-template-columns:1fr;}
+    .install-grid{grid-template-columns:1fr;}
+    .footer-inner{flex-direction:column;gap:1rem;text-align:center;}
+    nav.lp .nav-links li:not(:last-child){display:none;}
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
     
       
     
@@ -79,11 +196,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#auditml" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -114,7 +226,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              AuditML — Privacy Auditing for PyTorch Models
             
           </span>
         </div>
@@ -377,26 +489,6 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
       
       <a href="." class="md-nav__link md-nav__link--active">
         
@@ -414,80 +506,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-auditml-does" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What AuditML does
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick example
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#project-layout" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Project layout
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#navigation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Navigation
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -1140,71 +1158,6 @@
   
   
   
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-auditml-does" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What AuditML does
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick example
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#project-layout" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Project layout
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#navigation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Navigation
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -1217,107 +1170,124 @@
               
               <article class="md-content__inner md-typeset">
                 
-                  
+<nav class="lp">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><div class="logo-icon">A</div>AuditML</a>
+    <ul class="nav-links">
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#attacks">Attacks</a></li>
+      <li><a href="guide/quickstart/">Docs</a></li>
+      <li><a href="https://github.com/EemanAsghar/AuditML-Privacy-Toolkit" target="_blank" class="nav-cta">GitHub ↗</a></li>
+    </ul>
+  </div>
+</nav>
 
+<div class="hero">
+  <div class="hero-badge"><span class="dot"></span>Open Source · MIT License</div>
+  <h1>Privacy Auditing<br/>for <span class="grad">PyTorch Models</span></h1>
+  <p>One function call to audit your trained model for membership inference, model inversion, and attribute inference attacks. Know your model's privacy risk before deployment.</p>
+  <div class="hero-actions">
+    <a href="#install" class="btn-primary">Get Started →</a>
+    <a href="guide/quickstart/" class="btn-secondary">Read the Docs</a>
+  </div>
+  <div class="code-window">
+    <div class="code-titlebar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span>audit.py</span></div>
+    <div class="code-body">
+<span class="ck">import</span> <span class="cn">auditml</span><br/><br/>
+<span class="cm"># Works with any trained PyTorch model</span><br/>
+<span class="cn">results</span> <span class="cn">=</span> <span class="cf">auditml.audit</span><span class="cn">(model, member_loader, nonmember_loader)</span><br/><br/>
+<span class="cf">print</span><span class="cn">(results.summary())</span><br/><br/>
+<span class="cm"># Attack            Accuracy   AUC-ROC</span><br/>
+<span class="cm"># mia_threshold        0.612     0.641</span><br/>
+<span class="cm"># model_inversion      0.553     0.571</span><br/>
+<span class="co"># ⚠  Leakage detected — consider DP training</span><br/><br/>
+<span class="cm"># Open interactive HTML report in browser</span><br/>
+<span class="cn">results</span><span class="cn">.</span><span class="cf">report</span><span class="cn">(</span><span class="cs">"./report"</span><span class="cn">, open_browser=</span><span class="ck">True</span><span class="cn">)</span>
+    </div>
+  </div>
+</div>
 
-  
-  
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="num">4</div><div class="label">Privacy Attacks</div></div>
+    <div class="stat-item"><div class="num">418</div><div class="label">Tests Passing</div></div>
+    <div class="stat-item"><div class="num">1</div><div class="label">Function Call</div></div>
+    <div class="stat-item"><div class="num">MIT</div><div class="label">Open Source</div></div>
+  </div>
+</div>
 
+<section class="lp" id="how-it-works">
+  <div class="section-inner">
+    <div class="section-tag">How it works</div>
+    <h2 class="section-title">From model to privacy report in three steps</h2>
+    <p class="section-sub">No config files. No YAML. Bring your model and data — AuditML handles the rest.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><div class="step-icon">🧠</div><h3>Train your model</h3><p>Use any PyTorch architecture. If it's an <code>nn.Module</code>, it works.</p><div class="step-code"><span style="color:#c084fc">model</span> = <span style="color:#60a5fa">MyCNN</span>()<br/><span style="color:#64748b"># ... your training loop</span></div></div>
+      <div class="step"><div class="step-num">02</div><div class="step-icon">🔍</div><h3>Run the audit</h3><p>Pass your model and two loaders — members and non-members. Run all four attacks or pick specific ones.</p><div class="step-code"><span style="color:#c084fc">results</span> = <span style="color:#60a5fa">auditml.audit</span>(<br/>&nbsp;&nbsp;<span style="color:#f1f5f9">model, members, nonmembers</span><br/>)</div></div>
+      <div class="step"><div class="step-num">03</div><div class="step-icon">📊</div><h3>Get your report</h3><p>AUC-ROC, accuracy, TPR@1%FPR per attack. An interactive HTML report opens automatically in your browser.</p><div class="step-code"><span style="color:#34d399">results</span>.report(<span style="color:#fbbf24">"./report"</span>, open_browser=<span style="color:#c084fc">True</span>)</div></div>
+    </div>
+  </div>
+</section>
 
-<h1 id="auditml">AuditML<a class="headerlink" href="#auditml" title="Permanent link">&para;</a></h1>
-<p><strong>AuditML</strong> is a privacy auditing toolkit for PyTorch models. It lets you measure how much private information a trained model leaks through a suite of membership inference, model inversion, and attribute inference attacks — with optional Differential Privacy training to harden your model.</p>
-<hr />
-<h2 id="what-auditml-does">What AuditML does<a class="headerlink" href="#what-auditml-does" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Capability</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Membership Inference</strong></td>
-<td>Determines whether a given sample was in the training set</td>
-</tr>
-<tr>
-<td><strong>Shadow Model MIA</strong></td>
-<td>Trains surrogate models to build a membership classifier</td>
-</tr>
-<tr>
-<td><strong>Model Inversion</strong></td>
-<td>Reconstructs representative images for each class</td>
-</tr>
-<tr>
-<td><strong>Attribute Inference</strong></td>
-<td>Predicts sensitive attributes from model outputs</td>
-</tr>
-<tr>
-<td><strong>DP Training</strong></td>
-<td>Trains with Opacus to provide (ε, δ)-differential privacy</td>
-</tr>
-<tr>
-<td><strong>Reporting</strong></td>
-<td>Generates metrics, plots, and human-readable summaries</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="quick-example">Quick example<a class="headerlink" href="#quick-example" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">auditml</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditPipeline</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">pipeline</span> <span class="o">=</span> <span class="n">AuditPipeline</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s2">&quot;configs/audit_mnist.yaml&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">results</span>  <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span>
-</code></pre></div>
-<p>Or from the command line:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>auditml<span class="w"> </span>train<span class="w">  </span>--config<span class="w"> </span>configs/audit_mnist.yaml
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>auditml<span class="w"> </span>audit<span class="w">  </span>--config<span class="w"> </span>configs/audit_mnist.yaml<span class="w"> </span>--attack<span class="w"> </span>mia_threshold
-</code></pre></div>
-<hr />
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>auditml
-</code></pre></div>
-<p>See <a href="guide/installation/">Installation</a> for the full setup guide, including the optional Rust acceleration module.</p>
-<hr />
-<h2 id="project-layout">Project layout<a class="headerlink" href="#project-layout" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>auditml/
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>├── src/auditml/
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>│   ├── attacks/        # MIA, shadow, model inversion, attribute inference
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>│   ├── config/         # YAML schema + typed dataclasses
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>│   ├── data/           # Dataset loaders (MNIST, CIFAR-10, CIFAR-100)
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>│   ├── models/         # CNN architectures
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>│   ├── training/       # Standard + DP trainer
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>│   ├── reporting/      # Report generator + comparison tools
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>│   └── utils/          # Device detection, Rust acceleration
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>├── configs/            # Example YAML configs
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>├── rust/               # Rust extension (optional speedup)
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>├── tests/              # pytest suite
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>└── docs/               # This documentation
-</code></pre></div>
-<hr />
-<h2 id="navigation">Navigation<a class="headerlink" href="#navigation" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="guide/installation/">Installation</a> — pip, Rust extension, dependencies</li>
-<li><a href="guide/quickstart/">Quick Start</a> — run your first audit in 5 minutes</li>
-<li><a href="guide/training/">Training Models</a> — standard and DP training options</li>
-<li><a href="guide/attacks/">Privacy Attacks</a> — all four attack types explained</li>
-<li><a href="guide/differential_privacy/">Differential Privacy</a> — ε, δ, and Opacus</li>
-<li><a href="guide/interpretation/">Interpreting Results</a> — what the numbers mean</li>
-</ul>
+<section class="lp" id="attacks" style="background:var(--bg-subtle)">
+  <div class="section-inner">
+    <div class="section-tag">Privacy Attacks</div>
+    <h2 class="section-title">Four attacks. One unified API.</h2>
+    <p class="section-sub">Each attack exposes a different kind of privacy leakage. Run them all or pick only what you need.</p>
+    <div class="attacks-grid">
+      <div class="attack-card"><div class="attack-icon">🎯</div><span class="attack-badge badge-fast">Fast · seconds</span><h3>Threshold MIA</h3><p>Classifies members vs non-members by thresholding model confidence. The fastest attack — a strong privacy baseline in seconds.</p><div class="attack-meta"><div class="attack-meta-item"><span>Type:</span><span class="tag">White-box</span></div><div class="attack-meta-item"><span>Signal:</span><span class="tag">Loss / confidence</span></div></div></div>
+      <div class="attack-card"><div class="attack-icon">👥</div><span class="attack-badge badge-powerful">Powerful · minutes</span><h3>Shadow Model MIA</h3><p>Trains shadow models to build an MLP membership classifier. The most powerful known membership inference attack.</p><div class="attack-meta"><div class="attack-meta-item"><span>Type:</span><span class="tag">Black-box</span></div><div class="attack-meta-item"><span>Signal:</span><span class="tag">Output distribution</span></div></div></div>
+      <div class="attack-card"><div class="attack-icon">🖼️</div><span class="attack-badge badge-visual">Visual · white-box</span><h3>Model Inversion</h3><p>Reconstructs training images via gradient descent in pixel space. Exposes what the model has memorised about each class.</p><div class="attack-meta"><div class="attack-meta-item"><span>Type:</span><span class="tag">White-box</span></div><div class="attack-meta-item"><span>Signal:</span><span class="tag">Gradients + TV loss</span></div></div></div>
+      <div class="attack-card"><div class="attack-icon">🔍</div><span class="attack-badge badge-sensitive">Sensitive attribute</span><h3>Attribute Inference</h3><p>Predicts sensitive group membership from softmax outputs — revealing whether the model leaks protected attributes.</p><div class="attack-meta"><div class="attack-meta-item"><span>Type:</span><span class="tag">Black-box</span></div><div class="attack-meta-item"><span>Signal:</span><span class="tag">Softmax outputs</span></div></div></div>
+    </div>
+  </div>
+</section>
 
+<section class="lp" id="install" style="background:var(--bg-subtle)">
+  <div class="section-inner">
+    <div class="install-grid">
+      <div class="install-left">
+        <div class="section-tag">Get started</div>
+        <h2>Up and running<br/>in 60 seconds</h2>
+        <p>Install with pip and call <code style="background:var(--bg-muted);padding:0.1rem 0.4rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:0.9em">auditml.audit()</code> on your model. No API key, no signup.</p>
+        <div class="pip-box"><code>pip install auditml</code><button class="copy-btn" onclick="navigator.clipboard.writeText('pip install auditml');this.textContent='✓ copied';setTimeout(()=>this.textContent='copy',2000)">copy</button></div>
+        <p class="install-note">Requires Python 3.10+ and PyTorch 2.x.<br/><a href="guide/installation/">Read the full installation guide →</a></p>
+      </div>
+      <div class="install-right">
+        <div class="code-window">
+          <div class="code-titlebar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span>example.py</span></div>
+          <div class="code-body">
+<span class="ck">import</span> <span class="cn">auditml</span><br/><br/>
+<span class="cm"># Split dataset into members / non-members</span><br/>
+<span class="cn">m, nm</span> = <span class="cf">auditml.split_loaders</span><span class="cn">(train_dataset)</span><br/><br/>
+<span class="cm"># Run all attacks</span><br/>
+<span class="cn">results</span> = <span class="cf">auditml.audit</span><span class="cn">(model, m, nm)</span><br/><br/>
+<span class="cm"># Inspect</span><br/>
+<span class="cn">results</span><span class="cn">[</span><span class="cs">"mia_threshold"</span><span class="cn">].auc_roc</span> <span class="cm"># → 0.641</span><br/>
+<span class="cn">results</span><span class="cn">.</span><span class="cf">is_vulnerable</span><span class="cn">()</span>      <span class="cm"># → True</span><br/><br/>
+<span class="cm"># Save and reload</span><br/>
+<span class="cn">results</span><span class="cn">.</span><span class="cf">save</span><span class="cn">(</span><span class="cs">"results.json"</span><span class="cn">)</span><br/>
+<span class="cn">r2</span> = <span class="cf">auditml.AuditResults.load</span><span class="cn">(</span><span class="cs">"results.json"</span><span class="cn">)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
+<footer class="lp">
+  <div class="footer-inner">
+    <div class="footer-logo"><div style="width:24px;height:24px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:900;">A</div>AuditML</div>
+    <ul class="footer-links">
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#attacks">Attacks</a></li>
+      <li><a href="guide/quickstart/">Documentation</a></li>
+      <li><a href="https://github.com/EemanAsghar/AuditML-Privacy-Toolkit" target="_blank">GitHub</a></li>
+    </ul>
+    <p class="footer-copy">MIT License · Built by <a href="https://github.com/EemanAsghar" target="_blank">Eeman Asghar</a> · NUML Faisalabad FYP 2025</p>
+  </div>
+</footer>
 
-
-
-
-
-
-
-
-
-
-                
               </article>
             </div>
           
