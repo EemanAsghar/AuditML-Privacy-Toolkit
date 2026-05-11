@@ -30,6 +30,12 @@ theme:
     - content.code.copy
   icon:
     repo: fontawesome/brands/github
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+extra_css:
+  - stylesheets/extra.css
 
 plugins:
   - search

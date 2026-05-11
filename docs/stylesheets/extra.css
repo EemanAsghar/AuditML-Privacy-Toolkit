@@ -1,0 +1,156 @@
+/* ── AuditML docs – clean professional override ──────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900&display=swap');
+
+/* ── Typography ──────────────────────────────────────────────────────── */
+:root {
+  --md-text-font: "Inter", system-ui, sans-serif;
+  --md-code-font: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+}
+
+body { -webkit-font-smoothing: antialiased; }
+
+/* ── Colour palette (light) ─────────────────────────────────────────── */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color:        #4f46e5;
+  --md-primary-fg-color--light: #6366f1;
+  --md-primary-fg-color--dark:  #3730a3;
+  --md-accent-fg-color:         #4f46e5;
+  --md-default-bg-color:        #fafaf9;
+  --md-default-fg-color:        #0d0d0d;
+  --md-default-fg-color--light: #555550;
+  --md-default-fg-color--lighter: #888884;
+  --md-typeset-color:           #1a1a1a;
+  --md-typeset-a-color:         #4f46e5;
+  --md-code-bg-color:           #111111;
+  --md-code-fg-color:           #e5e5e5;
+}
+
+/* ── Colour palette (dark) ──────────────────────────────────────────── */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:        #6366f1;
+  --md-primary-fg-color--light: #818cf8;
+  --md-primary-fg-color--dark:  #4f46e5;
+  --md-accent-fg-color:         #818cf8;
+  --md-default-bg-color:        #0f0f0f;
+  --md-default-fg-color:        #f0f0ee;
+  --md-typeset-a-color:         #818cf8;
+  --md-code-bg-color:           #1a1a1a;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+.md-header {
+  background: #fafaf9;
+  border-bottom: 1.5px solid rgba(0,0,0,0.08);
+  box-shadow: none;
+}
+[data-md-color-scheme="slate"] .md-header {
+  background: #0f0f0f;
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+.md-header__title {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 1.4rem;
+}
+.md-tabs { border-bottom: 1.5px solid rgba(0,0,0,0.08); }
+[data-md-color-scheme="slate"] .md-tabs { border-bottom-color: rgba(255,255,255,0.08); }
+.md-tabs__link { font-weight: 500; font-size: .8rem; letter-spacing: .01em; }
+
+/* ── Content area ───────────────────────────────────────────────────── */
+.md-content__inner { max-width: 780px; }
+
+/* Headings */
+.md-typeset h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  color: var(--md-default-fg-color);
+}
+.md-typeset h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  border-bottom: 1.5px solid rgba(0,0,0,0.08);
+  padding-bottom: .4rem;
+  margin-top: 2.4rem;
+}
+[data-md-color-scheme="slate"] .md-typeset h2 { border-bottom-color: rgba(255,255,255,0.08); }
+.md-typeset h3 { font-weight: 600; letter-spacing: -0.02em; }
+
+/* Body text */
+.md-typeset { font-size: .9rem; line-height: 1.75; color: var(--md-typeset-color); }
+.md-typeset p { margin-bottom: 1rem; }
+
+/* Links */
+.md-typeset a { color: var(--md-typeset-a-color); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .15s; }
+.md-typeset a:hover { border-bottom-color: var(--md-typeset-a-color); }
+
+/* ── Code blocks ─────────────────────────────────────────────────────── */
+.md-typeset code {
+  font-size: .82em;
+  padding: .15em .4em;
+  border-radius: 5px;
+  background: rgba(0,0,0,0.06);
+  color: #c2185b;
+}
+[data-md-color-scheme="slate"] .md-typeset code {
+  background: rgba(255,255,255,0.08);
+  color: #f06292;
+}
+.highlight { border-radius: 10px; overflow: hidden; }
+.md-typeset pre { border-radius: 10px; }
+.md-typeset pre code { color: var(--md-code-fg-color); background: transparent; padding: 0; border-radius: 0; }
+
+/* ── Admonitions ─────────────────────────────────────────────────────── */
+.md-typeset .admonition {
+  border-left-width: 3px;
+  border-radius: 0 8px 8px 0;
+  box-shadow: none;
+}
+.md-typeset .admonition-title { font-weight: 600; font-size: .85rem; }
+
+/* ── Tables ──────────────────────────────────────────────────────────── */
+.md-typeset table:not([class]) {
+  border: 1.5px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: none;
+}
+.md-typeset table:not([class]) th { background: rgba(0,0,0,0.04); font-weight: 600; font-size: .82rem; letter-spacing: .03em; text-transform: uppercase; }
+.md-typeset table:not([class]) td, .md-typeset table:not([class]) th { border-color: rgba(0,0,0,0.06); }
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) { border-color: rgba(255,255,255,0.08); }
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th { background: rgba(255,255,255,0.04); }
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) td,
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th { border-color: rgba(255,255,255,0.06); }
+
+/* ── Navigation sidebar ──────────────────────────────────────────────── */
+.md-nav__title { font-weight: 700; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
+.md-nav__link { font-size: .82rem; }
+.md-nav__link--active { font-weight: 600; color: var(--md-typeset-a-color) !important; }
+
+/* ── Search ──────────────────────────────────────────────────────────── */
+.md-search__form { border-radius: 8px; border: 1.5px solid rgba(0,0,0,0.1); box-shadow: none; }
+.md-search__input { font-size: .85rem; }
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+.md-footer {
+  background: #0d0d0d;
+  color: #888884;
+}
+.md-footer-meta { background: #0d0d0d; }
+.md-footer__inner { font-size: .78rem; }
+.md-footer-nav__direction { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: #888884; }
+.md-footer-nav__title { font-weight: 700; color: #f0f0ee; }
+.md-footer-nav__link:hover .md-footer-nav__title { color: #818cf8; }
+
+/* ── Scrollbar (webkit) ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
+[data-md-color-scheme="slate"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
