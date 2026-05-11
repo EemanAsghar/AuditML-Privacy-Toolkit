@@ -41,140 +41,246 @@
 
 
     
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
-.md-header,.md-tabs,.md-footer,.md-sidebar,.md-main__inner>.md-content>article>h1{display:none!important}
-.md-main{margin:0!important}.md-main__inner{margin:0!important;max-width:100%!important}
-.md-content{max-width:100%!important}.md-content__inner{margin:0!important;padding:0!important}
+/* ── hide all Material chrome ───────────────────────────────────────── */
+.md-header,.md-tabs,.md-footer,.md-sidebar,
+.md-main__inner>.md-content>article>h1{display:none!important}
+.md-main{margin:0!important}
+.md-main__inner{margin:0!important;max-width:100%!important}
+.md-content{max-width:100%!important}
+.md-content__inner{margin:0!important;padding:0!important}
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#fafaf9;
-  --bg2:#f5f5f3;
-  --bg3:#eeeeeb;
-  --border:rgba(0,0,0,0.08);
-  --text:#0d0d0d;
-  --text2:#555550;
-  --text3:#999990;
-  --accent:#111111;
-  --indigo:#4f46e5;
-  --indigo2:#6366f1;
-  --code-bg:#111111;
-  --code-text:#e5e5e5;
-  --radius:12px;
+/* ── reset (scoped to landing page) ────────────────────────────────── */
+.lp *,.lp *::before,.lp *::after{box-sizing:border-box;margin:0;padding:0}
+.lp ul,.lp ol{list-style:none!important;padding-left:0!important;margin:0!important}
+.lp li{list-style:none!important;list-style-type:none!important;display:block}
+.lp a{color:inherit;text-decoration:none}
+.lp img{display:block;max-width:100%}
+.lp pre,.lp code{font-family:'JetBrains Mono','Fira Code',ui-monospace,monospace}
+
+/* ── tokens ─────────────────────────────────────────────────────────── */
+.lp{
+  --bg:      #fafaf9;
+  --bg2:     #f4f4f2;
+  --border:  rgba(0,0,0,0.08);
+  --text:    #0d0d0d;
+  --text2:   #5a5a55;
+  --text3:   #9a9a94;
+  --indigo:  #4f46e5;
+  --dark:    #0d0d0d;
+  --w:       1100px;
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
 }
-html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-a{color:inherit;text-decoration:none}
-img{display:block;max-width:100%}
 
-/* NAV */
-.lp-nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(250,250,249,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
-.lp-nav-inner{max-width:1120px;margin:0 auto;padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;gap:2rem}
-.lp-logo{display:flex;align-items:center;gap:0.6rem;font-weight:800;font-size:1rem;letter-spacing:-0.02em;color:var(--text);flex-shrink:0}
-.lp-logo-mark{width:30px;height:30px;background:var(--text);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.8rem;font-weight:900;letter-spacing:-0.01em}
-.lp-nav-links{display:flex;align-items:center;gap:0.1rem;list-style:none}
-.lp-nav-links a{padding:0.45rem 1rem;border-radius:8px;font-size:0.875rem;font-weight:500;color:var(--text2);transition:color 0.15s,background 0.15s;white-space:nowrap}
-.lp-nav-links a:hover{color:var(--text);background:var(--bg3)}
-.lp-nav-gh{background:var(--text)!important;color:#fff!important;border-radius:8px;padding:0.45rem 1.1rem!important;font-weight:600!important;transition:opacity 0.2s!important}
-.lp-nav-gh:hover{opacity:0.8!important;background:var(--text)!important}
-
-/* HERO */
-.lp-hero{padding:160px 2rem 120px;max-width:1120px;margin:0 auto}
-.lp-hero-label{display:inline-flex;align-items:center;gap:0.5rem;font-size:0.78rem;font-weight:600;color:var(--text2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2.5rem}
-.lp-hero-label::before{content:'';width:20px;height:1.5px;background:var(--text3)}
-.lp-hero h1{font-size:clamp(3rem,6.5vw,6rem);font-weight:900;line-height:1.02;letter-spacing:-0.04em;color:var(--text);margin-bottom:2rem;max-width:820px}
-.lp-hero h1 em{font-style:normal;color:var(--indigo)}
-.lp-hero-sub{font-size:1.15rem;color:var(--text2);line-height:1.75;max-width:520px;margin-bottom:3rem;font-weight:400}
-.lp-hero-actions{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:5rem}
-.btn-dark{display:inline-flex;align-items:center;gap:0.5rem;background:var(--text);color:#fff;padding:0.8rem 1.75rem;border-radius:10px;font-weight:600;font-size:0.95rem;transition:opacity 0.2s,transform 0.2s}
-.btn-dark:hover{opacity:0.85;transform:translateY(-1px)}
-.btn-outline{display:inline-flex;align-items:center;gap:0.5rem;background:transparent;color:var(--text);border:1.5px solid var(--border);padding:0.8rem 1.75rem;border-radius:10px;font-weight:600;font-size:0.95rem;transition:border-color 0.2s,background 0.2s}
-.btn-outline:hover{border-color:rgba(0,0,0,0.25);background:var(--bg2)}
-
-/* CODE WINDOW */
-.lp-code{background:var(--code-bg);border-radius:16px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.14),0 0 0 1px rgba(255,255,255,0.04);max-width:700px}
-.lp-code-bar{background:#1a1a1a;padding:0.9rem 1.25rem;display:flex;align-items:center;gap:0.45rem}
-.lp-code-bar span{margin-left:auto;font-size:0.75rem;font-family:'JetBrains Mono','Fira Code',monospace;color:#555}
-.d1{width:11px;height:11px;border-radius:50%;background:#ff5f57}
-.d2{width:11px;height:11px;border-radius:50%;background:#febc2e}
-.d3{width:11px;height:11px;border-radius:50%;background:#28c840}
-.lp-code-body{padding:1.75rem 2rem;font-family:'JetBrains Mono','Fira Code',monospace;font-size:0.855rem;line-height:1.85;color:var(--code-text);overflow-x:auto}
-.t-kw{color:#c084fc}.t-fn{color:#60a5fa}.t-st{color:#34d399}.t-cm{color:#4a4a4a}.t-co{color:#fb923c}.t-tx{color:#e5e5e5}.t-op{color:#6b7280}
-
-/* STATS STRIP */
-.lp-stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg)}
-.lp-stats-inner{max-width:1120px;margin:0 auto;padding:3rem 2rem;display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;text-align:left}
-.lp-stat-n{font-size:2.5rem;font-weight:900;letter-spacing:-0.04em;color:var(--text);line-height:1}
-.lp-stat-l{font-size:0.85rem;color:var(--text3);font-weight:500;margin-top:0.4rem}
-
-/* SECTIONS */
-.lp-section{padding:120px 2rem}
-.lp-section-inner{max-width:1120px;margin:0 auto}
-.lp-eyebrow{font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:1.25rem}
-.lp-section-h{font-size:clamp(2rem,3.5vw,3rem);font-weight:800;letter-spacing:-0.03em;line-height:1.1;color:var(--text);margin-bottom:1.25rem}
-.lp-section-p{font-size:1.05rem;color:var(--text2);line-height:1.75;max-width:500px}
-
-/* HOW IT WORKS */
-.lp-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5px;background:var(--border);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;margin-top:4rem}
-.lp-step{background:var(--bg);padding:2.5rem;transition:background 0.2s}
-.lp-step:hover{background:var(--bg2)}
-.lp-step-n{font-size:0.72rem;font-weight:800;letter-spacing:0.12em;color:var(--text3);text-transform:uppercase;margin-bottom:1.5rem;font-family:'JetBrains Mono',monospace}
-.lp-step-icon{font-size:1.5rem;margin-bottom:1rem}
-.lp-step h3{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:0.6rem;letter-spacing:-0.01em}
-.lp-step p{font-size:0.9rem;color:var(--text2);line-height:1.65}
-.lp-step-snippet{margin-top:1.25rem;background:var(--code-bg);border-radius:8px;padding:0.85rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.77rem;color:var(--code-text);overflow-x:auto;line-height:1.7}
-
-/* ATTACKS */
-.lp-attacks{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;margin-top:4rem}
-.lp-attack{background:var(--bg);padding:2.5rem;transition:background 0.2s;position:relative}
-.lp-attack:hover{background:var(--bg2)}
-.lp-attack-badge{display:inline-block;font-size:0.68rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;padding:0.2rem 0.65rem;border-radius:5px;margin-bottom:1rem}
-.b-fast{background:#dcfce7;color:#15803d}.b-power{background:#fef9c3;color:#a16207}.b-visual{background:#ede9fe;color:#6d28d9}.b-attr{background:#fee2e2;color:#b91c1c}
-.lp-attack h3{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:0.6rem;letter-spacing:-0.01em}
-.lp-attack p{font-size:0.875rem;color:var(--text2);line-height:1.65;margin-bottom:1.25rem}
-.lp-attack-meta{display:flex;gap:1.5rem}
-.lp-attack-meta span{font-size:0.78rem;color:var(--text3)}
-.lp-attack-meta strong{color:var(--text2);font-weight:600}
-
-/* INSTALL */
-.lp-install{background:var(--text)}
-.lp-install .lp-eyebrow{color:#555}
-.lp-install .lp-section-h{color:#fff}
-.lp-install .lp-section-p{color:#999}
-.lp-install-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:5rem;align-items:center;margin-top:4rem}
-.lp-pip{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;margin:1.5rem 0 1rem}
-.lp-pip code{font-family:'JetBrains Mono',monospace;font-size:0.92rem;color:#34d399}
-.lp-copy{background:#2a2a2a;border:none;color:#888;font-size:0.75rem;padding:0.35rem 0.75rem;border-radius:6px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:background 0.15s,color 0.15s}
-.lp-copy:hover{background:#333;color:#ccc}
-.lp-install-note{font-size:0.82rem;color:#555;line-height:1.6}
-.lp-install-note a{color:#818cf8;font-weight:500}
-.lp-install-note a:hover{text-decoration:underline}
-.lp-install .lp-code{box-shadow:0 0 0 1px rgba(255,255,255,0.06)}
-
-/* FOOTER */
-.lp-footer{background:var(--text);border-top:1px solid rgba(255,255,255,0.06);padding:4rem 2rem}
-.lp-footer-inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:2rem}
-.lp-footer-logo{font-weight:800;font-size:0.95rem;color:#fff;display:flex;align-items:center;gap:0.6rem;letter-spacing:-0.02em}
-.lp-footer-logo .lp-logo-mark{background:#fff;color:#111}
-.lp-footer-links{display:flex;gap:2rem;list-style:none}
-.lp-footer-links a{font-size:0.85rem;color:#555;font-weight:500;transition:color 0.15s}
-.lp-footer-links a:hover{color:#999}
-.lp-footer-copy{font-size:0.8rem;color:#444}
-.lp-footer-copy a{color:#818cf8}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  .lp-steps,.lp-attacks{grid-template-columns:1fr}
-  .lp-install-grid{grid-template-columns:1fr;gap:3rem}
-  .lp-stats-inner{grid-template-columns:repeat(2,1fr)}
-  .lp-nav-links li:not(:last-child){display:none}
+/* ── nav ─────────────────────────────────────────────────────────────── */
+.lp-nav{
+  position:fixed;top:0;left:0;right:0;z-index:999;
+  height:60px;
+  background:rgba(250,250,249,0.9);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
 }
-@media(max-width:600px){
-  .lp-hero h1{font-size:2.6rem}
-  .lp-hero-actions{flex-direction:column;align-items:flex-start}
-  .lp-footer-inner{flex-direction:column;gap:1.5rem}
-  .lp-footer-links{flex-wrap:wrap;gap:1rem}
+.lp-nav-inner{
+  max-width:var(--w);margin:0 auto;padding:0 2rem;
+  height:100%;display:flex;align-items:center;justify-content:space-between;
+}
+.lp-nav-logo{
+  font-weight:800;font-size:.92rem;letter-spacing:-.03em;color:var(--text);
+  display:flex;align-items:center;gap:.55rem;
+}
+.lp-nav-mark{
+  width:28px;height:28px;background:var(--dark);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:.75rem;font-weight:900;flex-shrink:0;
+}
+.lp-nav-menu{display:flex;align-items:center;gap:.1rem}
+.lp-nav-menu li{display:inline-flex!important}
+.lp-nav-menu a{
+  padding:.4rem .85rem;border-radius:7px;
+  font-size:.82rem;font-weight:500;color:var(--text2);
+  transition:color .15s,background .15s;white-space:nowrap;
+}
+.lp-nav-menu a:hover{color:var(--text);background:var(--bg2)}
+.lp-nav-cta{
+  background:var(--dark)!important;color:#fff!important;
+  border-radius:7px;padding:.4rem 1rem!important;
+  font-weight:600!important;font-size:.82rem!important;
+  transition:opacity .2s!important;
+}
+.lp-nav-cta:hover{opacity:.75!important;background:var(--dark)!important}
+
+/* ── hero ─────────────────────────────────────────────────────────────── */
+.lp-hero{
+  max-width:var(--w);margin:0 auto;
+  padding:130px 2rem 80px;
+}
+.lp-pre{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:1.75rem;
+}
+.lp-pre::before{content:'';width:18px;height:1.5px;background:var(--text3);flex-shrink:0}
+.lp-h1{
+  font-size:clamp(2.8rem,5.5vw,5.5rem);
+  font-weight:900;line-height:1.0;letter-spacing:-.045em;
+  color:var(--text);margin-bottom:1.5rem;max-width:760px;
+}
+.lp-h1 em{font-style:italic;color:var(--indigo)}
+.lp-sub{
+  font-size:1.05rem;color:var(--text2);line-height:1.7;
+  max-width:480px;margin-bottom:2.5rem;
+}
+.lp-btns{display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;margin-bottom:4rem}
+.btn-a{
+  display:inline-flex;align-items:center;gap:.45rem;
+  background:var(--dark);color:#fff;
+  padding:.72rem 1.5rem;border-radius:9px;
+  font-weight:700;font-size:.88rem;
+  transition:opacity .2s,transform .15s;
+}
+.btn-a:hover{opacity:.8;transform:translateY(-1px)}
+.btn-b{
+  display:inline-flex;align-items:center;gap:.45rem;
+  background:transparent;color:var(--text);
+  border:1.5px solid var(--border);
+  padding:.72rem 1.5rem;border-radius:9px;
+  font-weight:600;font-size:.88rem;
+  transition:border-color .2s,background .15s;
+}
+.btn-b:hover{border-color:rgba(0,0,0,.22);background:var(--bg2)}
+
+/* ── code window ─────────────────────────────────────────────────────── */
+.lp-win{
+  background:#111;border-radius:14px;overflow:hidden;
+  box-shadow:0 24px 60px rgba(0,0,0,.18),0 0 0 1px rgba(255,255,255,.04);
+  max-width:660px;
+}
+.lp-win-bar{
+  background:#1c1c1c;padding:.75rem 1.1rem;
+  display:flex;align-items:center;gap:.4rem;
+}
+.lp-win-bar span{margin-left:auto;font-family:monospace;font-size:.7rem;color:#444}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+.lp-win-code{
+  padding:1.5rem 1.75rem;
+  font-size:.83rem;line-height:1.85;
+  color:#e5e5e5;overflow-x:auto;
+}
+.lp-win-code br{display:block}
+.kw{color:#c084fc}.fn{color:#60a5fa}.st{color:#34d399}
+.cm{color:#4a4a4a}.co{color:#fb923c}.op{color:#6b7280}
+
+/* ── stats ────────────────────────────────────────────────────────────── */
+.lp-stats{
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.lp-stats-in{
+  max-width:var(--w);margin:0 auto;padding:2.25rem 2rem;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1.5rem;
+}
+.lp-sn{font-size:2.2rem;font-weight:900;letter-spacing:-.04em;line-height:1}
+.lp-sl{font-size:.8rem;color:var(--text3);font-weight:500;margin-top:.3rem}
+
+/* ── section wrapper ─────────────────────────────────────────────────── */
+.lp-sec{padding:80px 2rem}
+.lp-sec-in{max-width:var(--w);margin:0 auto}
+.lp-ey{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
+.lp-sh{font-size:clamp(1.6rem,2.5vw,2.4rem);font-weight:800;letter-spacing:-.035em;line-height:1.1;margin-bottom:.9rem}
+.lp-sp{font-size:.95rem;color:var(--text2);line-height:1.7;max-width:460px}
+
+/* ── attacks grid ─────────────────────────────────────────────────────── */
+.lp-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  border:1.5px solid var(--border);border-radius:14px;
+  overflow:hidden;background:var(--border);gap:1.5px;
+  margin-top:3rem;
+}
+.lp-card{background:var(--bg);padding:2rem 2.25rem}
+.lp-card:hover{background:var(--bg2)}
+.lp-badge{
+  display:inline-block;font-size:.65rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:.18rem .6rem;border-radius:4px;margin-bottom:.85rem;
+}
+.bg-g{background:#dcfce7;color:#15803d}
+.bg-y{background:#fef9c3;color:#92400e}
+.bg-p{background:#ede9fe;color:#5b21b6}
+.bg-r{background:#fee2e2;color:#991b1b}
+.lp-card h3{font-size:.98rem;font-weight:700;letter-spacing:-.015em;margin-bottom:.5rem}
+.lp-card p{font-size:.84rem;color:var(--text2);line-height:1.6;margin-bottom:1rem}
+.lp-card-meta{display:flex;gap:1.25rem;flex-wrap:wrap}
+.lp-card-meta span{font-size:.75rem;color:var(--text3);font-weight:500}
+.lp-card-meta strong{color:var(--text2)}
+
+/* ── install (dark) ─────────────────────────────────────────────────── */
+.lp-install{background:var(--dark)}
+.lp-install .lp-ey{color:#555}
+.lp-install .lp-sh{color:#fff}
+.lp-install .lp-sp{color:#777}
+.lp-ig{
+  display:grid;grid-template-columns:1fr 1.1fr;
+  gap:4rem;align-items:center;margin-top:3rem;
+}
+.lp-pip{
+  background:#1a1a1a;border:1px solid #2a2a2a;border-radius:9px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 1.15rem;margin:1.25rem 0 .75rem;
+}
+.lp-pip code{font-size:.88rem;color:#34d399}
+.lp-cpybtn{
+  background:#242424;border:none;color:#666;
+  font-size:.72rem;padding:.3rem .65rem;border-radius:5px;
+  cursor:pointer;font-family:monospace;transition:background .15s,color .15s;
+}
+.lp-cpybtn:hover{background:#2e2e2e;color:#aaa}
+.lp-note{font-size:.78rem;color:#555;line-height:1.6}
+.lp-note a{color:#818cf8;font-weight:500}
+.lp-note a:hover{text-decoration:underline}
+.lp-install .lp-win{box-shadow:0 0 0 1px rgba(255,255,255,.05)}
+
+/* ── footer ─────────────────────────────────────────────────────────── */
+.lp-foot{
+  background:var(--dark);border-top:1px solid rgba(255,255,255,.06);
+  padding:3rem 2rem;
+}
+.lp-foot-in{
+  max-width:var(--w);margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1.5rem;
+}
+.lp-foot-logo{
+  font-weight:800;font-size:.9rem;color:#fff;
+  display:flex;align-items:center;gap:.55rem;letter-spacing:-.03em;
+}
+.lp-foot-logo .lp-nav-mark{background:#fff;color:#111}
+.lp-foot-links{display:flex;gap:1.75rem}
+.lp-foot-links li{display:inline-flex!important}
+.lp-foot-links a{font-size:.8rem;color:#4a4a4a;font-weight:500;transition:color .15s}
+.lp-foot-links a:hover{color:#888}
+.lp-foot-copy{font-size:.75rem;color:#3a3a3a}
+.lp-foot-copy a{color:#818cf8}
+
+/* ── responsive ─────────────────────────────────────────────────────── */
+@media(max-width:860px){
+  .lp-grid{grid-template-columns:1fr}
+  .lp-ig{grid-template-columns:1fr;gap:2.5rem}
+  .lp-stats-in{grid-template-columns:repeat(2,1fr)}
+  .lp-nav-menu li:not(:last-child):not(:nth-last-child(2)){display:none!important}
+}
+@media(max-width:540px){
+  .lp-h1{font-size:2.5rem}
+  .lp-btns{flex-direction:column;align-items:flex-start}
+  .lp-foot-in{flex-direction:column;gap:1.25rem}
+  .lp-foot-links{flex-wrap:wrap;gap:1rem}
+  .lp-nav-menu li:not(:last-child){display:none!important}
 }
 </style>
 
@@ -1193,140 +1299,111 @@ img{display:block;max-width:100%}
               
               <article class="md-content__inner md-typeset">
                 
+<div class="lp">
 
 <!-- NAV -->
 <nav class="lp-nav">
   <div class="lp-nav-inner">
-    <a href="/" class="lp-logo">
-      <div class="lp-logo-mark">A</div>
-      AuditML
+    <a href="." class="lp-nav-logo">
+      <div class="lp-nav-mark">A</div>AuditML
     </a>
-    <ul class="lp-nav-links">
-      <li><a href="#how-it-works">How it works</a></li>
+    <ul class="lp-nav-menu">
       <li><a href="#attacks">Attacks</a></li>
       <li><a href="guide/quickstart/">Docs</a></li>
-      <li><a href="https://github.com/EemanAsghar/AuditML-Privacy-Toolkit" target="_blank" class="lp-nav-gh">GitHub ↗</a></li>
+      <li><a href="https://github.com/EemanAsghar/AuditML-Privacy-Toolkit" target="_blank" rel="noopener" class="lp-nav-cta">GitHub ↗</a></li>
     </ul>
   </div>
 </nav>
 
 <!-- HERO -->
 <div class="lp-hero">
-  <div class="lp-hero-label">Privacy Auditing Toolkit</div>
-  <h1>Know what your<br/>model <em>leaks</em>.</h1>
-  <p class="lp-hero-sub">
+  <div class="lp-pre">Privacy Auditing Toolkit</div>
+  <h1 class="lp-h1">Know what your<br/>model <em>leaks</em>.</h1>
+  <p class="lp-sub">
     One function call audits any PyTorch model for membership inference,
     model inversion, and attribute inference attacks —
-    with an interactive HTML report that opens automatically.
+    with an interactive HTML report.
   </p>
-  <div class="lp-hero-actions">
-    <a href="#install" class="btn-dark">Get started →</a>
-    <a href="guide/quickstart/" class="btn-outline">Read the docs</a>
+  <div class="lp-btns">
+    <a href="#install" class="btn-a">Get started →</a>
+    <a href="guide/quickstart/" class="btn-b">Read the docs</a>
   </div>
 
-  <div class="lp-code">
-    <div class="lp-code-bar">
-      <div class="d1"></div><div class="d2"></div><div class="d3"></div>
+  <div class="lp-win">
+    <div class="lp-win-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
       <span>audit.py</span>
     </div>
-    <div class="lp-code-body">
-<span class="t-kw">import</span> <span class="t-tx">auditml</span><br/><br/>
-<span class="t-cm"># Split your training set into members / non-members</span><br/>
-<span class="t-tx">member_loader</span><span class="t-op">,</span> <span class="t-tx">nonmember_loader</span> <span class="t-op">=</span> <span class="t-fn">auditml.split_loaders</span><span class="t-op">(</span><span class="t-tx">train_dataset</span><span class="t-op">)</span><br/><br/>
-<span class="t-cm"># Audit — works with any nn.Module</span><br/>
-<span class="t-tx">results</span> <span class="t-op">=</span> <span class="t-fn">auditml.audit</span><span class="t-op">(</span><span class="t-tx">model</span><span class="t-op">,</span> <span class="t-tx">member_loader</span><span class="t-op">,</span> <span class="t-tx">nonmember_loader</span><span class="t-op">)</span><br/><br/>
-<span class="t-fn">print</span><span class="t-op">(</span><span class="t-tx">results</span><span class="t-op">.</span><span class="t-fn">summary</span><span class="t-op">())</span><br/>
-<span class="t-cm">#  Attack             Accuracy   AUC-ROC</span><br/>
-<span class="t-cm">#  mia_threshold         0.612     0.641</span><br/>
-<span class="t-cm">#  model_inversion       0.553     0.571</span><br/>
-<span class="t-co">#  ⚠  Leakage detected — consider DP training</span><br/><br/>
-<span class="t-cm"># Open interactive HTML report in browser</span><br/>
-<span class="t-tx">results</span><span class="t-op">.</span><span class="t-fn">report</span><span class="t-op">(</span><span class="t-st">"./report"</span><span class="t-op">,</span> <span class="t-tx">open_browser</span><span class="t-op">=</span><span class="t-kw">True</span><span class="t-op">)</span>
+    <div class="lp-win-code">
+<span class="kw">import</span> auditml<br/>
+<br/>
+<span class="cm"># Split training set → members / non-members</span><br/>
+m, nm <span class="op">=</span> <span class="fn">auditml.split_loaders</span>(train_dataset)<br/>
+<br/>
+<span class="cm"># Audit any nn.Module</span><br/>
+results <span class="op">=</span> <span class="fn">auditml.audit</span>(model, m, nm)<br/>
+<br/>
+<span class="fn">print</span>(results.<span class="fn">summary</span>())<br/>
+<span class="cm">#  mia_threshold    AUC 0.641  ⚠ leakage</span><br/>
+<span class="cm">#  model_inversion  AUC 0.571</span><br/>
+<br/>
+<span class="cm"># Open HTML report in browser</span><br/>
+results.<span class="fn">report</span>(<span class="st">"./report"</span>, open_browser<span class="op">=</span><span class="kw">True</span>)
     </div>
   </div>
 </div>
 
 <!-- STATS -->
 <div class="lp-stats">
-  <div class="lp-stats-inner">
-    <div><div class="lp-stat-n">4</div><div class="lp-stat-l">Privacy attacks</div></div>
-    <div><div class="lp-stat-n">418</div><div class="lp-stat-l">Tests passing</div></div>
-    <div><div class="lp-stat-n">91%</div><div class="lp-stat-l">Code coverage</div></div>
-    <div><div class="lp-stat-n">MIT</div><div class="lp-stat-l">Open source</div></div>
+  <div class="lp-stats-in">
+    <div><div class="lp-sn">4</div><div class="lp-sl">Privacy attacks</div></div>
+    <div><div class="lp-sn">418</div><div class="lp-sl">Tests passing</div></div>
+    <div><div class="lp-sn">91%</div><div class="lp-sl">Code coverage</div></div>
+    <div><div class="lp-sn">MIT</div><div class="lp-sl">Open source</div></div>
   </div>
 </div>
 
-<!-- HOW IT WORKS -->
-<section class="lp-section" id="how-it-works">
-  <div class="lp-section-inner">
-    <div class="lp-eyebrow">How it works</div>
-    <h2 class="lp-section-h">From model to privacy report<br/>in three steps.</h2>
-    <p class="lp-section-p">No config files. No boilerplate. Bring your model and your data — AuditML handles the rest.</p>
-    <div class="lp-steps">
-      <div class="lp-step">
-        <div class="lp-step-n">01 — Train</div>
-        <div class="lp-step-icon">🧠</div>
-        <h3>Train your model</h3>
-        <p>Use any PyTorch architecture. CNN, ResNet, Transformer — if it's an <code>nn.Module</code>, it works.</p>
-        <div class="lp-step-snippet"><span style="color:#c084fc">model</span> = <span style="color:#60a5fa">MyCNN</span>()<br/><span style="color:#4a4a4a"># your training loop here</span></div>
-      </div>
-      <div class="lp-step">
-        <div class="lp-step-n">02 — Audit</div>
-        <div class="lp-step-icon">🔍</div>
-        <h3>Run the audit</h3>
-        <p>Pass your trained model and two data loaders. Choose which attacks to run, or run all four at once.</p>
-        <div class="lp-step-snippet"><span style="color:#c084fc">results</span> = <span style="color:#60a5fa">auditml.audit</span>(<br/>&nbsp;&nbsp;<span style="color:#e5e5e5">model, members, nonmembers</span><br/>)</div>
-      </div>
-      <div class="lp-step">
-        <div class="lp-step-n">03 — Report</div>
-        <div class="lp-step-icon">📊</div>
-        <h3>Get your report</h3>
-        <p>AUC-ROC, TPR@1%FPR, accuracy — per attack. An interactive HTML report opens automatically in your browser.</p>
-        <div class="lp-step-snippet"><span style="color:#34d399">results</span>.report(<span style="color:#fbbf24">"./out"</span>, open_browser=<span style="color:#c084fc">True</span>)</div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ATTACKS -->
-<section class="lp-section" id="attacks" style="background:var(--bg2);padding-top:100px;padding-bottom:100px">
-  <div class="lp-section-inner">
-    <div class="lp-eyebrow">Privacy Attacks</div>
-    <h2 class="lp-section-h">Four attacks. One unified API.</h2>
-    <p class="lp-section-p">Each attack exposes a different kind of leakage. Run them all or pick only what you need.</p>
-    <div class="lp-attacks">
-      <div class="lp-attack">
-        <span class="lp-attack-badge b-fast">Fast · seconds</span>
+<section class="lp-sec" id="attacks">
+  <div class="lp-sec-in">
+    <div class="lp-ey">Privacy Attacks</div>
+    <h2 class="lp-sh">Four attacks. One unified API.</h2>
+    <p class="lp-sp">Each attack exposes a different kind of leakage. Run them all or pick only what you need.</p>
+    <div class="lp-grid">
+      <div class="lp-card">
+        <span class="lp-badge bg-g">Fast · seconds</span>
         <h3>Threshold MIA</h3>
-        <p>Classifies training members vs non-members by thresholding the model's loss or confidence. The fastest attack — a strong privacy baseline.</p>
-        <div class="lp-attack-meta">
+        <p>Classifies members vs non-members by thresholding the model's loss or confidence. Fast and surprisingly effective.</p>
+        <div class="lp-card-meta">
           <span><strong>White-box</strong></span>
           <span><strong>Loss / confidence</strong></span>
         </div>
       </div>
-      <div class="lp-attack">
-        <span class="lp-attack-badge b-power">Powerful · minutes</span>
+      <div class="lp-card">
+        <span class="lp-badge bg-y">Powerful · minutes</span>
         <h3>Shadow Model MIA</h3>
-        <p>Trains shadow models with known membership labels, then trains an MLP attack classifier on their outputs. The strongest known MIA.</p>
-        <div class="lp-attack-meta">
+        <p>Trains shadow models with known labels, then builds an MLP attack classifier on their outputs. The strongest known MIA.</p>
+        <div class="lp-card-meta">
           <span><strong>Black-box</strong></span>
           <span><strong>Output distribution</strong></span>
         </div>
       </div>
-      <div class="lp-attack">
-        <span class="lp-attack-badge b-visual">Visual · gradient</span>
+      <div class="lp-card">
+        <span class="lp-badge bg-p">Visual · gradient</span>
         <h3>Model Inversion</h3>
-        <p>Reconstructs representative training images by optimising in pixel space via gradient descent. Exposes what the model has memorised.</p>
-        <div class="lp-attack-meta">
+        <p>Reconstructs representative training images via gradient ascent in pixel space — exposing what the model has memorised.</p>
+        <div class="lp-card-meta">
           <span><strong>White-box</strong></span>
           <span><strong>Gradients + TV loss</strong></span>
         </div>
       </div>
-      <div class="lp-attack">
-        <span class="lp-attack-badge b-attr">Sensitive attribute</span>
+      <div class="lp-card">
+        <span class="lp-badge bg-r">Sensitive attribute</span>
         <h3>Attribute Inference</h3>
-        <p>Predicts sensitive group membership from softmax outputs — revealing whether the model leaks protected attributes about individuals.</p>
-        <div class="lp-attack-meta">
+        <p>Predicts sensitive group membership from softmax outputs — revealing whether the model leaks protected attributes.</p>
+        <div class="lp-card-meta">
           <span><strong>Black-box</strong></span>
           <span><strong>Softmax outputs</strong></span>
         </div>
@@ -1336,37 +1413,40 @@ img{display:block;max-width:100%}
 </section>
 
 <!-- INSTALL -->
-<section class="lp-section lp-install" id="install">
-  <div class="lp-section-inner">
-    <div class="lp-install-grid">
+<section class="lp-sec lp-install" id="install">
+  <div class="lp-sec-in">
+    <div class="lp-ig">
       <div>
-        <div class="lp-eyebrow">Get started</div>
-        <h2 class="lp-section-h">Up and running<br/>in 60 seconds.</h2>
-        <p class="lp-section-p">No account. No API key. Install and call <code style="background:#1a1a1a;padding:0.1rem 0.4rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:0.85em;color:#34d399">auditml.audit()</code> on your model.</p>
+        <div class="lp-ey">Get started</div>
+        <h2 class="lp-sh">Up and running<br/>in 60 seconds.</h2>
+        <p class="lp-sp">No account. No API key. Install and call <code style="background:#1a1a1a;padding:.1em .4em;border-radius:4px;color:#34d399;font-size:.85em">auditml.audit()</code> on your model.</p>
         <div class="lp-pip">
           <code>pip install auditml</code>
-          <button class="lp-copy" onclick="navigator.clipboard.writeText('pip install auditml');this.textContent='✓ copied';setTimeout(()=>this.textContent='copy',2000)">copy</button>
+          <button class="lp-cpybtn" onclick="navigator.clipboard.writeText('pip install auditml');this.textContent='✓ copied';setTimeout(()=>this.textContent='copy',2000)">copy</button>
         </div>
-        <p class="lp-install-note">Requires Python 3.10+ · PyTorch 2.x<br/><a href="guide/installation/">Full installation guide →</a></p>
+        <p class="lp-note">Python 3.10+ · PyTorch 2.x<br/><a href="guide/installation/">Full installation guide →</a></p>
       </div>
       <div>
-        <div class="lp-code" style="max-width:none">
-          <div class="lp-code-bar">
-            <div class="d1"></div><div class="d2"></div><div class="d3"></div>
+        <div class="lp-win" style="max-width:none">
+          <div class="lp-win-bar">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
             <span>full_example.py</span>
           </div>
-          <div class="lp-code-body">
-<span class="t-kw">import</span> <span class="t-tx">auditml</span><br/><br/>
-<span class="t-cm"># Split dataset → members / non-members</span><br/>
-<span class="t-tx">m</span><span class="t-op">,</span> <span class="t-tx">nm</span> <span class="t-op">=</span> <span class="t-fn">auditml.split_loaders</span><span class="t-op">(</span><span class="t-tx">train_dataset</span><span class="t-op">)</span><br/><br/>
-<span class="t-cm"># Run all attacks</span><br/>
-<span class="t-tx">results</span> <span class="t-op">=</span> <span class="t-fn">auditml.audit</span><span class="t-op">(</span><span class="t-tx">model</span><span class="t-op">,</span> <span class="t-tx">m</span><span class="t-op">,</span> <span class="t-tx">nm</span><span class="t-op">)</span><br/><br/>
-<span class="t-cm"># Access results</span><br/>
-<span class="t-tx">results</span><span class="t-op">[</span><span class="t-st">"mia_threshold"</span><span class="t-op">].</span><span class="t-tx">auc_roc</span>   <span class="t-cm"># → 0.641</span><br/>
-<span class="t-tx">results</span><span class="t-op">.</span><span class="t-fn">is_vulnerable</span><span class="t-op">()</span>           <span class="t-cm"># → True</span><br/><br/>
-<span class="t-cm"># Save / reload without re-running</span><br/>
-<span class="t-tx">results</span><span class="t-op">.</span><span class="t-fn">save</span><span class="t-op">(</span><span class="t-st">"results.json"</span><span class="t-op">)</span><br/>
-<span class="t-tx">r2</span> <span class="t-op">=</span> <span class="t-fn">auditml.AuditResults.load</span><span class="t-op">(</span><span class="t-st">"results.json"</span><span class="t-op">)</span>
+          <div class="lp-win-code">
+<span class="kw">import</span> auditml<br/>
+<br/>
+m, nm <span class="op">=</span> <span class="fn">auditml.split_loaders</span>(train_dataset)<br/>
+results <span class="op">=</span> <span class="fn">auditml.audit</span>(model, m, nm)<br/>
+<br/>
+<span class="cm"># Per-attack metrics</span><br/>
+results[<span class="st">"mia_threshold"</span>].auc_roc   <span class="cm"># → 0.641</span><br/>
+results.<span class="fn">is_vulnerable</span>()           <span class="cm"># → True</span><br/>
+<br/>
+<span class="cm"># Save / reload without re-running</span><br/>
+results.<span class="fn">save</span>(<span class="st">"results.json"</span>)<br/>
+r2 <span class="op">=</span> <span class="fn">auditml.AuditResults.load</span>(<span class="st">"results.json"</span>)
           </div>
         </div>
       </div>
@@ -1375,22 +1455,22 @@ img{display:block;max-width:100%}
 </section>
 
 <!-- FOOTER -->
-<footer class="lp-footer">
-  <div class="lp-footer-inner">
-    <div class="lp-footer-logo">
-      <div class="lp-logo-mark">A</div>
-      AuditML
+<footer class="lp-foot">
+  <div class="lp-foot-in">
+    <div class="lp-foot-logo">
+      <div class="lp-nav-mark">A</div>AuditML
     </div>
-    <ul class="lp-footer-links">
-      <li><a href="#how-it-works">How it works</a></li>
+    <ul class="lp-foot-links">
       <li><a href="#attacks">Attacks</a></li>
       <li><a href="guide/quickstart/">Docs</a></li>
-      <li><a href="https://github.com/EemanAsghar/AuditML-Privacy-Toolkit" target="_blank">GitHub</a></li>
+      <li><a href="api/attacks/">API</a></li>
+      <li><a href="https://github.com/EemanAsghar/AuditML-Privacy-Toolkit" target="_blank" rel="noopener">GitHub</a></li>
     </ul>
-    <p class="lp-footer-copy">MIT · <a href="https://github.com/EemanAsghar">Eeman Asghar</a> · NUML Faisalabad 2025</p>
+    <p class="lp-foot-copy">MIT · <a href="https://github.com/EemanAsghar">Eeman Asghar</a> · NUML Faisalabad 2025</p>
   </div>
 </footer>
 
+</div>
 
               </article>
             </div>
