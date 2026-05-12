@@ -225,4 +225,4 @@ Full documentation at **[eemanasghar.github.io/AuditML-Privacy-Toolkit](https://
 
 ## License
 
-MIT © Eeman Asghar, NUML Faisalabad, 2025
+MIT © Eeman Asghar,2026
