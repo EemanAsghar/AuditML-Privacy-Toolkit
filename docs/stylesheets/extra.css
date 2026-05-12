@@ -195,23 +195,47 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   background: rgba(129,140,248,0.1);
   color: #a5b4fc;
 }
-/* code blocks */
+
+/* code blocks — force dark background in both schemes */
+.md-typeset .highlight,
 .md-typeset pre {
+  background: #111 !important;
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.05);
-}
-.md-typeset pre > code {
-  background: transparent;
-  color: var(--md-code-fg-color);
-  padding: 0;
-  border-radius: 0;
-  font-weight: 400;
-  font-size: .83rem;
+  overflow: hidden;
 }
 .highlight { border-radius: 10px; overflow: hidden; }
+.md-typeset pre > code,
+.md-typeset .highlight code {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-weight: 400;
+  font-size: .83rem;
+  color: #ccc !important;       /* default token color — readable on dark */
+}
+
+/* Pygments token colors on dark background */
+.highlight .k,  .highlight .kn, .highlight .kw { color: #c084fc !important; } /* keywords */
+.highlight .n,  .highlight .nn { color: #e2e2e2 !important; }                  /* names */
+.highlight .nf, .highlight .nb { color: #60a5fa !important; }                  /* functions */
+.highlight .s,  .highlight .s1, .highlight .s2,
+.highlight .se, .highlight .si { color: #34d399 !important; }                  /* strings */
+.highlight .c,  .highlight .c1, .highlight .cm { color: #4a4a4a !important; }  /* comments */
+.highlight .mi, .highlight .mf { color: #fb923c !important; }                  /* numbers */
+.highlight .o,  .highlight .p  { color: #6b7280 !important; }                  /* operators */
+.highlight .nc { color: #60a5fa !important; }                                   /* class names */
+.highlight .nd { color: #c084fc !important; }                                   /* decorators */
+.highlight .bp { color: #60a5fa !important; }                                   /* builtins */
+.highlight .kc { color: #c084fc !important; }                                   /* True/False/None */
+.highlight .nt { color: #60a5fa !important; }                                   /* YAML/HTML tags */
+.highlight .na { color: #34d399 !important; }                                   /* attributes */
+.highlight .l,  .highlight .ld { color: #34d399 !important; }                  /* literals */
+/* line numbers */
+.highlight .ln, .highlight .lnt { color: #3a3a3a !important; }
 /* copy button */
-.md-clipboard { color: rgba(255,255,255,0.3); }
-.md-clipboard:hover { color: rgba(255,255,255,0.7); }
+.md-clipboard { color: rgba(255,255,255,0.25) !important; }
+.md-clipboard:hover { color: rgba(255,255,255,0.65) !important; }
 
 /* ─────────────────────────────────────────────────────────────────────
    ADMONITIONS
