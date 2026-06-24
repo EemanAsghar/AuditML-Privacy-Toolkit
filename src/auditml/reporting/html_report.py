@@ -200,6 +200,8 @@ def _recon_to_b64_png(arr: np.ndarray) -> str:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
+    if arr.ndim == 4:
+        arr = arr[0]  # (1,C,H,W) → (C,H,W)
     if arr.ndim == 3:
         img = arr.transpose(1, 2, 0)  # C,H,W → H,W,C
         img = (img - img.min()) / (img.max() - img.min() + 1e-8)
